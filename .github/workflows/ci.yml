@@ -30,17 +30,17 @@ jobs:
         run: dotnet restore Terminal.Gui.Cli.slnx
 
       - name: Build
-        run: dotnet build Terminal.Gui.Cli.slnx --no-restore
+        run: dotnet build Terminal.Gui.Cli.slnx --no-restore -c Debug
 
       - name: Verify code style
         if: matrix.os == 'ubuntu-latest'
         run: dotnet format Terminal.Gui.Cli.slnx --no-restore --verify-no-changes
 
       - name: Terminal.Gui.Cli.Tests
-        run: dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build
+        run: dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build -c Debug
 
       - name: Terminal.Gui.Cli.IntegrationTests
-        run: dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build
+        run: dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build -c Debug
 
       - name: Terminal.Gui.Cli.SmokeTests
-        run: dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build
+        run: dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build -c Debug

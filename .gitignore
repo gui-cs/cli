@@ -1,6 +1,12 @@
 **/bin/
 **/obj/
 .vs/
+.idea/
 *.user
 *.suo
+*.DotSettings.user
 TestResults/
+packages/
+publish/
+*.nupkg
+launchSettings.json

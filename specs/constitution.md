@@ -1,12 +1,12 @@
 # gui-cs/cli Constitution
 
-**Version**: 1.0 | **Ratified**: 2026-05-23 | **Last Amended**: 2026-05-23
+**Version**: 1.1 | **Ratified**: 2026-05-23 | **Last Amended**: 2026-05-23
 
-This constitution governs all contributions to `gui-cs/cli`.
+This constitution governs all contributions to `gui-cs/cli`. It is the highest-authority engineering document in this repository.
 
 ## I. Purpose & Scope
 
-`Terminal.Gui.Cli` is a `.NET` class library for CLI-focused APIs built on `Terminal.Gui`.
+`Terminal.Gui.Cli` is a `.NET` class library for exposing `Terminal.Gui` capabilities through scriptable CLI surfaces.
 
 - Package ID: `Terminal.Gui.Cli`
 - Namespace: `Terminal.Gui.Cli`
@@ -14,30 +14,50 @@ This constitution governs all contributions to `gui-cs/cli`.
 
 ## II. Non-Goals
 
-Until implementation begins, this repository is scaffold-only and should not accrue speculative feature code.
+Until implementation begins, this repository remains scaffold-first and should not accrue speculative production features.
 
-## III. Tenets
+## III. Architectural and Engineering Rules (C1-C8)
 
-1. Keep scaffolding and tooling reliable across Linux, macOS, and Windows.
-2. Keep changes surgical and high-signal.
-3. Keep warnings at zero and CI green.
-4. Prefer clear, maintainable project structure over premature complexity.
+Every PR must comply with all rules below.
 
-## IV. Architectural Rules
+### C1 — Only CliHost calls Terminal.Gui lifecycle APIs
 
-1. Production code lives under `src/Terminal.Gui.Cli`.
-2. Test projects are executable xUnit v3 projects under `tests/`.
-3. Examples live under `examples/` and must reference the source project.
-4. Shared build settings belong in `Directory.Build.props` and `Directory.Build.targets`.
+Initialization and shutdown of Terminal.Gui runtime lifecycle APIs must be centralized in `CliHost`. No command, helper, or utility type may call lifecycle entrypoints directly.
 
-## V. Testing Tiers
+### C2 — Public API changes require spec updates
 
-- `Terminal.Gui.Cli.Tests` — unit tests.
-- `Terminal.Gui.Cli.IntegrationTests` — integration tests.
-- `Terminal.Gui.Cli.SmokeTests` — smoke-level validation.
+Any change to public API surface must include corresponding updates in `specs/` in the same PR.
 
-All three test projects are run by CI on an OS matrix.
+### C3 — No reflection-based command discovery
 
-## VI. Governance
+Command discovery must be explicit and deterministic. Reflection scanning for command registration or dispatch is prohibited.
 
-Constitution changes require a pull request that updates this file and explains the rationale.
+### C4 — Source-generated JSON only
+
+Runtime reflection-based JSON serialization is disallowed. JSON paths must use source-generated `System.Text.Json` contexts.
+
+### C5 — Tests run in parallel and must avoid process-global mutation
+
+Test projects run in parallel by default. Tests must not mutate process-global state unless explicitly isolated with collection-level opt-outs.
+
+### C6 — Commands must never call Environment.Exit
+
+Command implementations return exit codes/results through framework abstractions and must not terminate the process directly.
+
+### C7 — Schema v1 is append-only
+
+For versioned machine-readable contracts, `v1` schemas are append-only. Existing fields/semantics are not removed or redefined.
+
+### C8 — Zero warnings
+
+Warnings are treated as errors. Builds and CI must remain warning-free.
+
+## IV. Testing Tiers
+
+- `Terminal.Gui.Cli.Tests` — unit tests
+- `Terminal.Gui.Cli.IntegrationTests` — integration tests
+- `Terminal.Gui.Cli.SmokeTests` — smoke-level validation
+
+## V. Governance
+
+Constitution changes require a pull request that updates this file and explains the rationale and migration impact.
