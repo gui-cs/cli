@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/Docs/">
+    <File Path="AGENTS.md" />
+    <File Path="CLAUDE.md" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="specs/constitution.md" />
+  </Folder>
+  <Folder Name="/Settings/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/finalize-release.yml" />
+    <File Path=".github/workflows/prepare-release.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+  </Folder>
+  <Project Path="examples/Terminal.Gui.Cli.ExampleApp/Terminal.Gui.Cli.ExampleApp.csproj" />
+  <Project Path="src/Terminal.Gui.Cli/Terminal.Gui.Cli.csproj" />
+  <Project Path="tests/Terminal.Gui.Cli.IntegrationTests/Terminal.Gui.Cli.IntegrationTests.csproj" />
+  <Project Path="tests/Terminal.Gui.Cli.SmokeTests/Terminal.Gui.Cli.SmokeTests.csproj" />
+  <Project Path="tests/Terminal.Gui.Cli.Tests/Terminal.Gui.Cli.Tests.csproj" />
+</Solution>

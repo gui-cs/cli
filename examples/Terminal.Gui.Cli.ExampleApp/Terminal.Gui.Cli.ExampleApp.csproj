@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Terminal.Gui.Cli.ExampleApp</RootNamespace>
+    <AssemblyName>Terminal.Gui.Cli.ExampleApp</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
+  </ItemGroup>
+
+</Project>
