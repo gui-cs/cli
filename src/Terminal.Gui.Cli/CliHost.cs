@@ -140,7 +140,7 @@ public sealed class CliHost
         }
         else if (_options.AgentGuide is not null)
         {
-            Registry.Register (new AgentGuideCommand (ResolveAgentGuide ())) ;
+            Registry.Register (new AgentGuideCommand (ResolveAgentGuide ()));
         }
     }
 
