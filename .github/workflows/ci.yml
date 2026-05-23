@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Restore
+        run: dotnet restore Terminal.Gui.Cli.slnx
+
+      - name: Build
+        run: dotnet build Terminal.Gui.Cli.slnx --no-restore
+
+      - name: Verify code style
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet format Terminal.Gui.Cli.slnx --no-restore --verify-no-changes
+
+      - name: Terminal.Gui.Cli.Tests
+        run: dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build
+
+      - name: Terminal.Gui.Cli.IntegrationTests
+        run: dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build
+
+      - name: Terminal.Gui.Cli.SmokeTests
+        run: dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build

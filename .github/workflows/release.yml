@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+    branches: [develop]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  resolve-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compute version
+        id: v
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            BASE=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' Directory.Build.props | head -1)
+            if [ -z "$BASE" ]; then
+              echo "::error::Could not read <Version> from Directory.Build.props."
+              exit 1
+            fi
+            VERSION="${BASE}.${GITHUB_RUN_NUMBER}"
+          else
+            echo "::error::Unsupported trigger: event=${{ github.event_name }} ref=${{ github.ref }}"
+            exit 1
+          fi
+
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not resolve version."
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build-and-test:
+    needs: resolve-version
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Restore
+        run: dotnet restore Terminal.Gui.Cli.slnx
+
+      - name: Build
+        run: dotnet build Terminal.Gui.Cli.slnx --no-restore -c Release -p:Version=${{ env.VERSION }}
+
+      - name: Terminal.Gui.Cli.Tests
+        run: dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build -c Release
+
+      - name: Terminal.Gui.Cli.IntegrationTests
+        run: dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build -c Release
+
+      - name: Terminal.Gui.Cli.SmokeTests
+        run: dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build -c Release
+
+  pack-and-publish:
+    needs: [resolve-version, build-and-test]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Pack Terminal.Gui.Cli
+        run: dotnet pack src/Terminal.Gui.Cli -c Release -p:Version=${{ env.VERSION }} -o packages/
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: packages/*.nupkg
+          retention-days: 30
+
+      - name: Push to NuGet
+        run: >
+          dotnet nuget push packages/*.nupkg
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Terminal.Gui.Cli</RootNamespace>
+    <AssemblyName>Terminal.Gui.Cli</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+
+    <PackageId>Terminal.Gui.Cli</PackageId>
+    <Description>CLI helpers and abstractions for Terminal.Gui applications.</Description>
+    <PackageTags>terminal-gui;tui;cli</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui" Version="$(TerminalGuiVersion)" />
+  </ItemGroup>
+
+</Project>
