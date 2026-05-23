@@ -52,12 +52,16 @@ For versioned machine-readable contracts, `v1` schemas are append-only. Existing
 
 Warnings are treated as errors. Builds and CI must remain warning-free.
 
-## IV. Testing Tiers
+## IV. Public API Layout
+
+Public API is documented in `specs/library-spec.md`. Two narrow file-layout exceptions are intentional: `CommandResult` and `CommandResult<T>` live together in `CommandResult.cs`, and `ICliCommand<TValue>` lives in `ICliCommandGeneric.cs`. Do not use angle brackets in filenames; the `Generic` suffix is the established convention for this single generic-interface companion file.
+
+## V. Testing Tiers
 
 - `Terminal.Gui.Cli.Tests` — unit tests
 - `Terminal.Gui.Cli.IntegrationTests` — integration tests
 - `Terminal.Gui.Cli.SmokeTests` — smoke-level validation
 
-## V. Governance
+## VI. Governance
 
 Constitution changes require a pull request that updates this file and explains the rationale and migration impact.
