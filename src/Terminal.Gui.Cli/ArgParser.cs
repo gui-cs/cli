@@ -176,19 +176,29 @@ public sealed class ArgParser
         string suffix = input.EndsWith ("ms", StringComparison.OrdinalIgnoreCase) ? "ms" : input[^1..].ToLowerInvariant ();
         string numberText = suffix == "ms" ? input[..^2] : input[..^1];
 
-        if (!double.TryParse (numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out double value) || value < 0)
+        if (!double.TryParse (numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out double value)
+            || !double.IsFinite (value)
+            || value < 0)
         {
             return false;
         }
 
-        timeout = suffix switch
+        try
         {
-            "ms" => TimeSpan.FromMilliseconds (value),
-            "s" => TimeSpan.FromSeconds (value),
-            "m" => TimeSpan.FromMinutes (value),
-            "h" => TimeSpan.FromHours (value),
-            _ => default
-        };
+            timeout = suffix switch
+            {
+                "ms" => TimeSpan.FromMilliseconds (value),
+                "s" => TimeSpan.FromSeconds (value),
+                "m" => TimeSpan.FromMinutes (value),
+                "h" => TimeSpan.FromHours (value),
+                _ => default
+            };
+        }
+        catch (OverflowException)
+        {
+            timeout = default;
+            return false;
+        }
 
         return timeout != default || value == 0;
     }

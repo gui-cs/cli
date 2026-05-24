@@ -83,7 +83,16 @@ public sealed class CliHost
 
         if (command is IViewerCommand viewer && runOptions.Cat)
         {
-            CommandResult? catResult = await viewer.RenderCatAsync (runOptions, stdout, effectiveToken);
+            CommandResult? catResult;
+
+            try
+            {
+                catResult = await viewer.RenderCatAsync (runOptions, stdout, effectiveToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return ExitCodes.Cancelled;
+            }
 
             if (catResult is not null)
             {
@@ -91,7 +100,16 @@ public sealed class CliHost
             }
         }
 
-        CommandResult result = await RunWithTerminalGuiAsync (command, runOptions, effectiveToken);
+        CommandResult result;
+
+        try
+        {
+            result = await RunWithTerminalGuiAsync (command, runOptions, effectiveToken);
+        }
+        catch (OperationCanceledException)
+        {
+            result = new CommandResult (CommandStatus.Cancelled, null, null, null);
+        }
 
         if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath))
         {

@@ -32,6 +32,12 @@ public sealed class ArgParserTests
     }
 
     [Fact]
+    public void TryParseTimeout_RejectsOverflowingValues ()
+    {
+        Assert.False (ArgParser.TryParseTimeout ("1e999999h", out _));
+    }
+
+    [Fact]
     public void Parse_RejectsMissingRequiredCommandOption ()
     {
         var parser = new ArgParser ([]);
