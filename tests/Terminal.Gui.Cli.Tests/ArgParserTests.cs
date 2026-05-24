@@ -32,7 +32,7 @@ public sealed class ArgParserTests
     }
 
     [Fact]
-    public void TryParseTimeout_RejectsOverflowingValues ()
+    public void TryParseTimeout_WithOverflowValue_ReturnsFalse ()
     {
         Assert.False (ArgParser.TryParseTimeout ("1e999999h", out _));
     }
