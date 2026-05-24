@@ -117,6 +117,19 @@ public sealed class ArgParser
                 continue;
             }
 
+            if (command is null && alias is not null)
+            {
+                // First pass (no command): skip unknown options after alias; they'll be validated in second pass.
+                index++;
+
+                if (index < args.Length && !args[index].StartsWith ('-'))
+                {
+                    index++;
+                }
+
+                continue;
+            }
+
             return ParseResult.Fail ($"Unknown option '{token}'.");
         }
 
