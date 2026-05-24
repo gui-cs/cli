@@ -1,5 +1,4 @@
 using Terminal.Gui.App;
-using Terminal.Gui.Cli;
 
 namespace Terminal.Gui.Cli.ExampleApp;
 
@@ -24,7 +23,7 @@ public sealed class GreetCommand : ICliCommand<string>
     /// <inheritdoc />
     public IReadOnlyList<CommandOptionDescriptor> Options { get; } =
     [
-        new CommandOptionDescriptor ("formal", "f", typeof (bool), "Use a formal greeting style.", false, null)
+        new ("formal", "f", typeof (bool), "Use a formal greeting style.", false, null)
     ];
 
     /// <inheritdoc />

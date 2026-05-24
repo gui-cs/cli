@@ -1,5 +1,4 @@
 using Terminal.Gui.App;
-using Terminal.Gui.Cli;
 
 namespace Terminal.Gui.Cli.ExampleApp;
 
