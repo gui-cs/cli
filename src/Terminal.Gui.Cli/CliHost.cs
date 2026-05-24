@@ -108,11 +108,7 @@ public sealed class CliHost
         }
         catch (OperationCanceledException)
         {
-            result = new CommandResult (
-                Status: CommandStatus.Cancelled,
-                Value: null,
-                ErrorCode: null,
-                ErrorMessage: null);
+            result = CreateCancelledResult ();
         }
 
         if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath))
@@ -121,6 +117,15 @@ public sealed class CliHost
         }
 
         return ExitCodes.FromResult (result);
+    }
+
+    private static CommandResult CreateCancelledResult ()
+    {
+        return new CommandResult (
+            Status: CommandStatus.Cancelled,
+            Value: null,
+            ErrorCode: null,
+            ErrorMessage: null);
     }
 
     private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions, CancellationToken cancellationToken)

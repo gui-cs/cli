@@ -49,7 +49,7 @@ public sealed class CliHostTests
         host.Registry.Register (new CancellingCatCommand ());
         using var stdout = new StringWriter ();
         using var stderr = new StringWriter ();
-        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource (TestContext.Current.CancellationToken);
+        using var cancellation = new CancellationTokenSource ();
         cancellation.Cancel ();
 
         int exitCode = await host.RunAsync (["cancel", "--cat"], cancellation.Token, stdout, stderr);
