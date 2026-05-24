@@ -4,8 +4,9 @@ This file provides guidance to AI coding agents working in this repository.
 
 ## Project status
 
-This repository currently contains scaffolding only for `Terminal.Gui.Cli`.
-No library implementation is present yet.
+This repository implements the `Terminal.Gui.Cli` library — a hosting layer
+for Terminal.Gui apps that provides CLI parsing, dispatch, JSON output, and
+AI-agent discoverability.
 
 ## Source of truth
 
@@ -24,12 +25,27 @@ If guidance conflicts, follow `specs/constitution.md`.
 
 ## Build and test
 
-- `dotnet restore Terminal.Gui.Cli.slnx`
-- `dotnet build Terminal.Gui.Cli.slnx --no-restore -c Debug`
-- `dotnet format Terminal.Gui.Cli.slnx --no-restore --verify-no-changes`
-- `dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build -c Debug`
-- `dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build -c Debug`
-- `dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build -c Debug`
+```bash
+dotnet restore Terminal.Gui.Cli.slnx
+dotnet build Terminal.Gui.Cli.slnx --no-restore -c Debug
+dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build -c Debug
+dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests --no-build -c Debug
+dotnet run --project tests/Terminal.Gui.Cli.SmokeTests --no-build -c Debug
+```
+
+## Code style verification (must pass before committing)
+
+CI runs JetBrains ReSharper cleanup (`dotnet jb cleanupcode`) followed by
+`dotnet format` and checks for a clean `git diff`. To replicate locally:
+
+```bash
+dotnet tool restore
+dotnet jb cleanupcode Terminal.Gui.Cli.slnx --no-build --verbosity=WARN
+dotnet format Terminal.Gui.Cli.slnx --no-restore
+git diff --exit-code   # must produce no output
+```
+
+Run these commands **before committing** to avoid CI failures.
 
 ## Coding standards
 
@@ -39,4 +55,6 @@ If guidance conflicts, follow `specs/constitution.md`.
 - Use Allman braces and always include braces for conditionals/loops.
 - Prefer guard clauses / early returns to deep nesting.
 - One type per file for non-trivial public/internal types.
+- **Use target-typed `new()`** when the type is clear from context (ReSharper enforces this).
+- **Do not add redundant `using` directives** — if a namespace matches the file's own namespace prefix, it's already in scope. ReSharper will remove these.
 - Do not add unrelated implementation while scaffolding.
