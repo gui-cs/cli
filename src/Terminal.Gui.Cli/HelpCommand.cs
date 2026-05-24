@@ -1,11 +1,13 @@
 using Terminal.Gui.App;
+using Terminal.Gui.Drawing;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
+using Command = Terminal.Gui.Input.Command;
 
 namespace Terminal.Gui.Cli;
 
-/// <summary>Interactive TUI markdown help viewer, with --cat support for ANSI stdout.</summary>
+/// <summary>Interactive TUI markdown help viewer with back/forward navigation and --cat support.</summary>
 public sealed class HelpCommand : IViewerCommand
 {
     private readonly IHelpProvider _helpProvider;
@@ -43,8 +45,8 @@ public sealed class HelpCommand : IViewerCommand
     public async Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
         CancellationToken cancellationToken)
     {
-        var markdown = ResolveHelp (options);
-        var title = options.Title ?? "Help";
+        var alias = options.Arguments.Count > 0 ? options.Arguments[0] : null;
+        var (markdown, title) = BuildHelpContent (alias);
 
         Runnable window = new ()
         {
@@ -56,34 +58,85 @@ public sealed class HelpCommand : IViewerCommand
         Markdown markdownView = new ()
         {
             Width = Dim.Fill (),
-            Height = Dim.Fill (1)
+            Height = Dim.Fill (1),
+            SyntaxHighlighter = new TextMateSyntaxHighlighter ()
+        };
+
+        markdownView.ViewportSettings |= ViewportSettingsFlags.HasHorizontalScrollBar;
+
+        Shortcut statusShortcut = new (Key.Empty, title, null) { MouseHighlightStates = MouseState.None };
+
+        var initialKey = alias ?? "(overview)";
+        BrowseBar browseBar = new (initialKey)
+        {
+            OnNavigate = NavigateTo
         };
 
         markdownView.LinkClicked += (_, e) =>
         {
-            if (e.Url is not null && e.Url.StartsWith ("help:", StringComparison.OrdinalIgnoreCase))
+            if (e.Url is null)
             {
-                var topic = e.Url["help:".Length..];
-                var topicMarkdown = ResolveHelpTopic (topic);
+                return;
+            }
 
-                if (topicMarkdown is not null)
-                {
-                    markdownView.Text = topicMarkdown;
-                    window.Title = $"Help - {topic}";
-                }
-
+            if (e.Url.StartsWith ("help:", StringComparison.OrdinalIgnoreCase))
+            {
+                var linkTopic = e.Url["help:".Length..];
+                var key = linkTopic.Equals ("help", StringComparison.OrdinalIgnoreCase)
+                    ? "(overview)"
+                    : linkTopic;
+                browseBar.Push (key);
+                NavigateTo (key);
                 e.Handled = true;
             }
         };
 
-        StatusBar statusBar = new (
+        List<Shortcut> statusItems =
         [
-            new Shortcut (Application.GetDefaultKey (Command.Quit), "Quit", window.RequestStop)
-        ]);
+            browseBar.Back,
+            browseBar.Forward,
+            new (Application.GetDefaultKey (Command.Quit), "Quit", window.RequestStop),
+            statusShortcut
+        ];
+
+        StatusBar statusBar = new (statusItems)
+        {
+            AlignmentModes = AlignmentModes.IgnoreFirstOrLast
+        };
+        browseBar.ApplyStyle ();
 
         window.Add (markdownView, statusBar);
 
-        window.Initialized += (_, _) => { markdownView.Text = markdown; };
+        window.Initialized += (_, _) =>
+        {
+            markdownView.Text = markdown;
+
+            // The Markdown view may auto-scroll to a focused link after layout.
+            // Reset viewport on the second draw to counteract this.
+            var drawCount = 0;
+
+            markdownView.DrawComplete += ResetViewport;
+
+            void ResetViewport (object? sender, DrawEventArgs e)
+            {
+                drawCount++;
+
+                if (drawCount >= 2)
+                {
+                    markdownView.DrawComplete -= ResetViewport;
+                    markdownView.Viewport = markdownView.Viewport with { Y = 0 };
+                }
+            }
+        };
+
+        void NavigateTo (string key)
+        {
+            var targetAlias = key == "(overview)" ? null : key;
+            var (md, t) = BuildHelpContent (targetAlias);
+            markdownView.Text = md;
+            window.Title = t;
+            statusShortcut.Title = t;
+        }
 
         await app.RunAsync (window, cancellationToken);
 
@@ -95,37 +148,28 @@ public sealed class HelpCommand : IViewerCommand
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull (stdout);
-        MarkdownRenderer.RenderToAnsi (ResolveHelp (options), stdout);
+        var alias = options.Arguments.Count > 0 ? options.Arguments[0] : null;
+        var (markdown, _) = BuildHelpContent (alias);
+        MarkdownRenderer.RenderToAnsi (markdown, stdout);
         return Task.FromResult<CommandResult?> (new CommandResult (CommandStatus.Ok, null, null, null));
     }
 
-    private string ResolveHelp (CommandRunOptions options)
+    private (string Markdown, string Title) BuildHelpContent (string? alias)
     {
-        if (options.Arguments.Count > 0 && _registry.TryResolve (options.Arguments[0], out ICliCommand? command) &&
-            command is not null)
+        if (alias is null)
         {
-            return _helpProvider.GetCommandHelp (command) ??
-                   new MetadataHelpProvider ().GetCommandHelp (command) ?? string.Empty;
+            var rootHelp = _helpProvider.GetRootHelp (_registry) ??
+                           new MetadataHelpProvider ().GetRootHelp (_registry) ?? string.Empty;
+            return (rootHelp, "Help");
         }
 
-        return _helpProvider.GetRootHelp (_registry) ??
-               new MetadataHelpProvider ().GetRootHelp (_registry) ?? string.Empty;
-    }
-
-    private string? ResolveHelpTopic (string topic)
-    {
-        if (topic.Equals ("help", StringComparison.OrdinalIgnoreCase))
+        if (_registry.TryResolve (alias, out ICliCommand? command) && command is not null)
         {
-            return _helpProvider.GetRootHelp (_registry) ??
-                   new MetadataHelpProvider ().GetRootHelp (_registry);
+            var commandHelp = _helpProvider.GetCommandHelp (command) ??
+                              new MetadataHelpProvider ().GetCommandHelp (command) ?? string.Empty;
+            return (commandHelp, $"Help - {command.PrimaryAlias}");
         }
 
-        if (_registry.TryResolve (topic, out ICliCommand? command) && command is not null)
-        {
-            return _helpProvider.GetCommandHelp (command) ??
-                   new MetadataHelpProvider ().GetCommandHelp (command);
-        }
-
-        return null;
+        return ($"# Unknown command: {alias}\n\nTry `help` to see available commands.", "Help");
     }
 }
