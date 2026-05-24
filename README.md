@@ -50,7 +50,7 @@ my-app greet --initial "World" --json
 
 # Agent discovery
 my-app --opencli
-my-app --agent-guide
+my-app agent-guide
 
 # Headless viewer
 my-app info --cat
@@ -65,7 +65,6 @@ All commands inherit these options from the host:
 | `--help` / `-h` | Show help |
 | `--version` | Show version |
 | `--opencli` | Emit OpenCLI metadata JSON |
-| `--agent-guide` | Emit embedded agent guide Markdown |
 | `--json` | Wrap output in JSON envelope |
 | `--initial <value>` | Pre-fill input value |
 | `--timeout <duration>` | Cancel after duration (e.g., `30s`, `5m`) |
