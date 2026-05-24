@@ -1,6 +1,6 @@
 using Terminal.Gui.App;
 
-namespace Terminal.Gui.Cli.ExampleApp;
+namespace Terminal.Gui.Cli.Greet;
 
 /// <summary>A viewer command that displays application information.</summary>
 public sealed class InfoCommand : IViewerCommand

@@ -60,6 +60,45 @@ public sealed class CliHostTests
         Assert.Equal (string.Empty, stderr.ToString ());
     }
 
+    [Fact]
+    public async Task RunAsync_HelpFlag_RendersMarkdownAsAnsi ()
+    {
+        CliHost host = new (options =>
+        {
+            options.ApplicationName = "test-app";
+            options.Version = "1.0.0";
+        });
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await host.RunAsync (["--help"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        var output = stdout.ToString ();
+        // MarkdownRenderer.RenderToAnsi produces ANSI escape sequences
+        Assert.Contains ("\x1b[", output);
+        Assert.Equal (string.Empty, stderr.ToString ());
+    }
+
+    [Fact]
+    public async Task RunAsync_HelpCat_RendersMarkdownAsAnsi ()
+    {
+        CliHost host = new (options =>
+        {
+            options.ApplicationName = "test-app";
+            options.Version = "1.0.0";
+        });
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await host.RunAsync (["help", "--cat"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        var output = stdout.ToString ();
+        Assert.Contains ("\x1b[", output);
+        Assert.Equal (string.Empty, stderr.ToString ());
+    }
+
     private sealed class CancellingCatCommand : IViewerCommand
     {
         public string PrimaryAlias => "cancel";

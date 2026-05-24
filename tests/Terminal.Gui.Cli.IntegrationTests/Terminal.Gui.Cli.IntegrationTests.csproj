@@ -15,4 +15,15 @@
     <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GoldensSourcePath</_Parameter1>
+      <_Parameter2>$(MSBuildProjectDirectory)\Goldens</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Goldens\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

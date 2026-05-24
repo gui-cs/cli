@@ -1,6 +1,6 @@
 using Terminal.Gui.App;
 
-namespace Terminal.Gui.Cli.ExampleApp;
+namespace Terminal.Gui.Cli.Greet;
 
 /// <summary>An input command that prompts for a name and returns a greeting.</summary>
 public sealed class GreetCommand : ICliCommand<string>

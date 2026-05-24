@@ -1,4 +1,7 @@
 using Terminal.Gui.App;
+using Terminal.Gui.Input;
+using Terminal.Gui.ViewBase;
+using Terminal.Gui.Views;
 
 namespace Terminal.Gui.Cli;
 
@@ -37,11 +40,37 @@ public sealed class HelpCommand : IViewerCommand
     public bool AcceptsPositionalArgs => true;
 
     /// <inheritdoc />
-    public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+    public async Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
         CancellationToken cancellationToken)
     {
         var markdown = ResolveHelp (options);
-        return Task.FromResult (new CommandResult (CommandStatus.Ok, markdown, null, null));
+        var title = options.Title ?? "Help";
+
+        Runnable window = new ()
+        {
+            Title = title,
+            Width = Dim.Fill (),
+            Height = Dim.Fill ()
+        };
+
+        Markdown markdownView = new ()
+        {
+            Width = Dim.Fill (),
+            Height = Dim.Fill (1)
+        };
+
+        StatusBar statusBar = new (
+        [
+            new Shortcut (Application.GetDefaultKey (Command.Quit), "Quit", window.RequestStop)
+        ]);
+
+        window.Add (markdownView, statusBar);
+
+        window.Initialized += (_, _) => { markdownView.Text = markdown; };
+
+        await app.RunAsync (window, cancellationToken);
+
+        return new CommandResult (CommandStatus.Ok, null, null, null);
     }
 
     /// <inheritdoc />
