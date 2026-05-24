@@ -18,7 +18,7 @@ public sealed class MetadataHelpProvider : IHelpProvider
 
         foreach (ICliCommand command in registry.All)
         {
-            builder.AppendLine ($"| `{command.PrimaryAlias}` | {command.Description} |");
+            builder.AppendLine ($"| `{command.PrimaryAlias}` | {EscapeCell (command.Description)} |");
         }
 
         builder.AppendLine ();
@@ -45,7 +45,7 @@ public sealed class MetadataHelpProvider : IHelpProvider
 
         StringBuilder builder = new ();
         builder.AppendLine ($"# {command.PrimaryAlias}");
-        builder.AppendLine (command.Description);
+        builder.AppendLine (EscapeCell (command.Description));
 
         if (command.Options.Count > 0)
         {
@@ -55,10 +55,20 @@ public sealed class MetadataHelpProvider : IHelpProvider
             foreach (CommandOptionDescriptor option in command.Options)
             {
                 var shortName = option.ShortName is null ? string.Empty : $" -{option.ShortName},";
-                builder.AppendLine ($" {shortName} --{option.Name}\t{option.Description}");
+                builder.AppendLine ($" {shortName} --{option.Name}\t{EscapeCell (option.Description)}");
             }
         }
 
         return builder.ToString ();
+    }
+
+    private static string EscapeCell (string? value)
+    {
+        if (string.IsNullOrEmpty (value))
+        {
+            return string.Empty;
+        }
+
+        return value.Replace ("|", "\\|").Replace ("\r\n", " ").Replace ("\n", " ").Replace ("\r", " ");
     }
 }
