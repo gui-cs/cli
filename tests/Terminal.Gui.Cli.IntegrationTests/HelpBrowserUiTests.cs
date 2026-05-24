@@ -54,7 +54,7 @@ public sealed class HelpBrowserUiTests
         {
             CommandOptions =
             [
-                new ("formal", "f", typeof (bool), "Use a formal greeting style.", false, null)
+                new CommandOptionDescriptor ("formal", "f", typeof (bool), "Use a formal greeting style.", false, null)
             ]
         };
         registry.Register (help);
