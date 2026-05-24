@@ -141,8 +141,9 @@ public sealed class CliHost
         switch (rootFlag)
         {
             case ArgParser.RootFlag.Help:
-                stdout.WriteLine (_helpProvider.GetRootHelp (Registry) ??
-                                  new MetadataHelpProvider ().GetRootHelp (Registry));
+                var helpMarkdown = _helpProvider.GetRootHelp (Registry) ??
+                                   new MetadataHelpProvider ().GetRootHelp (Registry) ?? string.Empty;
+                MarkdownRenderer.RenderToAnsi (helpMarkdown, stdout);
                 break;
             case ArgParser.RootFlag.Version:
                 stdout.WriteLine ($"{_options.ApplicationName} {_options.Version ?? "0.0.0"}");
