@@ -13,6 +13,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\agent-guide.md" LogicalName="Terminal.Gui.Cli.Greet.agent-guide.md" />
+    <EmbeddedResource Include="Resources\Help\help.md" LogicalName="help.md" />
+    <EmbeddedResource Include="Resources\Help\greet.md" LogicalName="greet.md" />
+    <EmbeddedResource Include="Resources\Help\farewell.md" LogicalName="farewell.md" />
+    <EmbeddedResource Include="Resources\Help\info.md" LogicalName="info.md" />
   </ItemGroup>
 
 </Project>
