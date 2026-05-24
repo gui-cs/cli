@@ -6,9 +6,9 @@ namespace Terminal.Gui.Cli;
 /// <summary>The main entry point. Owns parsing, dispatch, Terminal.Gui lifecycle, and output.</summary>
 public sealed class CliHost
 {
+    private readonly IHelpProvider _helpProvider;
     private readonly CliHostOptions _options;
     private readonly ArgParser _parser;
-    private readonly IHelpProvider _helpProvider;
 
     /// <summary>Creates a host, applies configuration, creates its registry, and registers built-ins.</summary>
     public CliHost (Action<CliHostOptions>? configure = null)
@@ -48,7 +48,8 @@ public sealed class CliHost
             return ExitCodes.Ok;
         }
 
-        if (initialParse.Alias is null || !Registry.TryResolve (initialParse.Alias, out ICliCommand? command) || command is null)
+        if (initialParse.Alias is null || !Registry.TryResolve (initialParse.Alias, out ICliCommand? command) ||
+            command is null)
         {
             stderr.WriteLine ($"Unknown command '{initialParse.Alias}'.");
             return ExitCodes.UsageError;
@@ -122,13 +123,14 @@ public sealed class CliHost
     private static CommandResult CreateCancelledResult ()
     {
         return new CommandResult (
-            Status: CommandStatus.Cancelled,
-            Value: null,
-            ErrorCode: null,
-            ErrorMessage: null);
+            CommandStatus.Cancelled,
+            null,
+            null,
+            null);
     }
 
-    private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions, CancellationToken cancellationToken)
+    private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions,
+        CancellationToken cancellationToken)
     {
         using IApplication app = Application.Create ().Init ();
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
@@ -139,7 +141,8 @@ public sealed class CliHost
         switch (rootFlag)
         {
             case ArgParser.RootFlag.Help:
-                stdout.WriteLine (_helpProvider.GetRootHelp (Registry) ?? new MetadataHelpProvider ().GetRootHelp (Registry));
+                stdout.WriteLine (_helpProvider.GetRootHelp (Registry) ??
+                                  new MetadataHelpProvider ().GetRootHelp (Registry));
                 break;
             case ArgParser.RootFlag.Version:
                 stdout.WriteLine ($"{_options.ApplicationName} {_options.Version ?? "0.0.0"}");
@@ -188,7 +191,7 @@ public sealed class CliHost
             throw new InvalidOperationException ($"AgentGuide resource '{_options.AgentGuide}' was not found.");
         }
 
-        using var reader = new StreamReader (stream);
+        using StreamReader reader = new (stream);
         return reader.ReadToEnd ();
     }
 }

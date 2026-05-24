@@ -5,8 +5,8 @@ namespace Terminal.Gui.Cli;
 /// <summary>Interactive TUI markdown help viewer, with --cat support for ANSI stdout.</summary>
 public sealed class HelpCommand : IViewerCommand
 {
-    private readonly ICommandRegistry _registry;
     private readonly IHelpProvider _helpProvider;
+    private readonly ICommandRegistry _registry;
 
     /// <summary>Creates a help command that lazily reads command metadata from <paramref name="registry" />.</summary>
     public HelpCommand (ICommandRegistry registry, IHelpProvider helpProvider)
@@ -37,14 +37,16 @@ public sealed class HelpCommand : IViewerCommand
     public bool AcceptsPositionalArgs => true;
 
     /// <inheritdoc />
-    public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options, CancellationToken cancellationToken)
+    public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+        CancellationToken cancellationToken)
     {
-        string markdown = ResolveHelp (options);
+        var markdown = ResolveHelp (options);
         return Task.FromResult (new CommandResult (CommandStatus.Ok, markdown, null, null));
     }
 
     /// <inheritdoc />
-    public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout, CancellationToken cancellationToken)
+    public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull (stdout);
         MarkdownRenderer.RenderToAnsi (ResolveHelp (options), stdout);
@@ -53,11 +55,14 @@ public sealed class HelpCommand : IViewerCommand
 
     private string ResolveHelp (CommandRunOptions options)
     {
-        if (options.Arguments.Count > 0 && _registry.TryResolve (options.Arguments[0], out ICliCommand? command) && command is not null)
+        if (options.Arguments.Count > 0 && _registry.TryResolve (options.Arguments[0], out ICliCommand? command) &&
+            command is not null)
         {
-            return _helpProvider.GetCommandHelp (command) ?? new MetadataHelpProvider ().GetCommandHelp (command) ?? string.Empty;
+            return _helpProvider.GetCommandHelp (command) ??
+                   new MetadataHelpProvider ().GetCommandHelp (command) ?? string.Empty;
         }
 
-        return _helpProvider.GetRootHelp (_registry) ?? new MetadataHelpProvider ().GetRootHelp (_registry) ?? string.Empty;
+        return _helpProvider.GetRootHelp (_registry) ??
+               new MetadataHelpProvider ().GetRootHelp (_registry) ?? string.Empty;
     }
 }

@@ -3,8 +3,8 @@ namespace Terminal.Gui.Cli;
 /// <summary>Default case-insensitive, duplicate-rejecting command registry.</summary>
 public sealed class CommandRegistry : ICommandRegistry
 {
-    private readonly Dictionary<string, ICliCommand> _commandsByAlias = new (StringComparer.OrdinalIgnoreCase);
     private readonly List<ICliCommand> _commands = [];
+    private readonly Dictionary<string, ICliCommand> _commandsByAlias = new (StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
     public IReadOnlyCollection<ICliCommand> All => _commands;
@@ -19,7 +19,7 @@ public sealed class CommandRegistry : ICommandRegistry
             throw new InvalidOperationException ("PrimaryAlias must be present in Aliases.");
         }
 
-        foreach (string alias in command.Aliases)
+        foreach (var alias in command.Aliases)
         {
             if (string.IsNullOrWhiteSpace (alias))
             {
@@ -34,7 +34,7 @@ public sealed class CommandRegistry : ICommandRegistry
 
         _commands.Add (command);
 
-        foreach (string alias in command.Aliases)
+        foreach (var alias in command.Aliases)
         {
             _commandsByAlias.Add (alias, command);
         }

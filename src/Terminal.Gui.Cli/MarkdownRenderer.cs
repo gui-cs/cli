@@ -11,7 +11,8 @@ public static class MarkdownRenderer
         ArgumentNullException.ThrowIfNull (markdown);
         ArgumentNullException.ThrowIfNull (output);
 
-        string rendered = new Markdown ().RenderToAnsi (markdown, Math.Max (1, Console.IsOutputRedirected ? 80 : Console.WindowWidth));
+        var rendered = new Markdown ().RenderToAnsi (markdown,
+            Math.Max (1, Console.IsOutputRedirected ? 80 : Console.WindowWidth));
         output.Write (TerminalEscapeSanitizer.SanitizeRenderedOutput (rendered));
     }
 }

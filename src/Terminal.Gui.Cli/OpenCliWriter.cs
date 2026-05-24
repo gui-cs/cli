@@ -11,14 +11,14 @@ public static class OpenCliWriter
         ArgumentNullException.ThrowIfNull (registry);
         ArgumentNullException.ThrowIfNull (options);
 
-        var builder = new StringBuilder ();
+        StringBuilder builder = new ();
         builder.Append ('{');
         AppendProperty (builder, "name", options.ApplicationName);
         builder.Append (',');
         AppendProperty (builder, "version", options.Version ?? "0.0.0");
         builder.Append (",\"commands\":[");
 
-        bool firstCommand = true;
+        var firstCommand = true;
 
         foreach (ICliCommand command in registry.All)
         {
@@ -32,9 +32,12 @@ public static class OpenCliWriter
         }
 
         builder.Append ("],\"frameworkOptions\":[");
-        string[] frameworkOptions = ["help", "version", "opencli", "initial", "title", "json", "timeout", "fullscreen", "cat", "output", "rows"];
+        string[] frameworkOptions =
+        [
+            "help", "version", "opencli", "initial", "title", "json", "timeout", "fullscreen", "cat", "output", "rows"
+        ];
 
-        for (int i = 0; i < frameworkOptions.Length; i++)
+        for (var i = 0; i < frameworkOptions.Length; i++)
         {
             if (i > 0)
             {
@@ -62,7 +65,7 @@ public static class OpenCliWriter
         AppendProperty (builder, "resultType", TypeNames.WireName (command.ResultType));
         builder.Append (",\"aliases\":[");
 
-        for (int i = 0; i < command.Aliases.Count; i++)
+        for (var i = 0; i < command.Aliases.Count; i++)
         {
             if (i > 0)
             {
@@ -76,7 +79,7 @@ public static class OpenCliWriter
 
         builder.Append ("],\"options\":[");
 
-        for (int i = 0; i < command.Options.Count; i++)
+        for (var i = 0; i < command.Options.Count; i++)
         {
             if (i > 0)
             {
@@ -126,9 +129,9 @@ public static class OpenCliWriter
 
     private static string Escape (string value)
     {
-        var builder = new StringBuilder (value.Length);
+        StringBuilder builder = new (value.Length);
 
-        foreach (char c in value)
+        foreach (var c in value)
         {
             switch (c)
             {

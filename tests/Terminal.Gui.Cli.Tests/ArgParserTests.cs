@@ -8,10 +8,11 @@ public sealed class ArgParserTests
     [Fact]
     public void Parse_SeparatesFrameworkGlobalsCommandOptionsAndPositionals ()
     {
-        var parser = new ArgParser ([new GlobalOptionDescriptor ("profile", "P", "Profile", false, true)]);
-        var command = new TestCommand (acceptsPositionalArgs: true);
+        ArgParser parser = new ([new GlobalOptionDescriptor ("profile", "P", "Profile", false, true)]);
+        TestCommand command = new (true);
 
-        ArgParser.ParseResult result = parser.Parse (["--profile", "dev", "pick", "--json", "--name", "value", "arg"], command);
+        ArgParser.ParseResult result =
+            parser.Parse (["--profile", "dev", "pick", "--json", "--name", "value", "arg"], command);
 
         Assert.True (result.Success, result.Error);
         Assert.Equal ("pick", result.Alias);
@@ -40,9 +41,9 @@ public sealed class ArgParserTests
     [Fact]
     public void Parse_RejectsMissingRequiredCommandOption ()
     {
-        var parser = new ArgParser ([]);
+        ArgParser parser = new ([]);
 
-        ArgParser.ParseResult result = parser.Parse (["pick"], new TestCommand (acceptsPositionalArgs: false));
+        ArgParser.ParseResult result = parser.Parse (["pick"], new TestCommand (false));
 
         Assert.False (result.Success);
         Assert.Contains ("--name", result.Error);
@@ -60,11 +61,13 @@ public sealed class ArgParserTests
 
         public Type ResultType => typeof (string);
 
-        public IReadOnlyList<CommandOptionDescriptor> Options { get; } = [new ("name", "n", typeof (string), "Name", true, null)];
+        public IReadOnlyList<CommandOptionDescriptor> Options { get; } =
+            [new ("name", "n", typeof (string), "Name", true, null)];
 
         public bool AcceptsPositionalArgs { get; } = acceptsPositionalArgs;
 
-        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options, CancellationToken cancellationToken)
+        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+            CancellationToken cancellationToken)
         {
             return Task.FromResult (new CommandResult (CommandStatus.Ok, "ok", null, null));
         }

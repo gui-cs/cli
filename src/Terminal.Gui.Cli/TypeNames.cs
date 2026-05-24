@@ -25,7 +25,8 @@ public static class TypeNames
             return "boolean";
         }
 
-        if (nullableType == typeof (int) || nullableType == typeof (long) || nullableType == typeof (short) || nullableType == typeof (byte))
+        if (nullableType == typeof (int) || nullableType == typeof (long) || nullableType == typeof (short) ||
+            nullableType == typeof (byte))
         {
             return "integer";
         }

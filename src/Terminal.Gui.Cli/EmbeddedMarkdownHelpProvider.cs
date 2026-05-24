@@ -39,7 +39,7 @@ public sealed class EmbeddedMarkdownHelpProvider : IHelpProvider
             return null;
         }
 
-        using var reader = new StreamReader (stream, Encoding.UTF8);
+        using StreamReader reader = new (stream, Encoding.UTF8);
         return reader.ReadToEnd ();
     }
 }

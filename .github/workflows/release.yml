@@ -69,6 +69,18 @@ jobs:
       - name: Build
         run: dotnet build Terminal.Gui.Cli.slnx --no-restore -c Release -p:Version=${{ env.VERSION }}
 
+      - name: Restore .NET tools
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet tool restore
+
+      - name: Verify code style
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          dotnet jb cleanupcode Terminal.Gui.Cli.slnx --no-build --verbosity=WARN
+          dotnet format Terminal.Gui.Cli.slnx --no-restore
+          git diff --exit-code
+
       - name: Terminal.Gui.Cli.Tests
         run: dotnet run --project tests/Terminal.Gui.Cli.Tests --no-build -c Release
 

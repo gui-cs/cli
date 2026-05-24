@@ -5,6 +5,19 @@ namespace Terminal.Gui.Cli;
 /// <summary>Data-driven parser for framework flags, consumer globals, and per-command options.</summary>
 public sealed class ArgParser
 {
+    /// <summary>Root flags that exit without command dispatch.</summary>
+    public enum RootFlag
+    {
+        /// <summary>Root --help or -h.</summary>
+        Help,
+
+        /// <summary>Root --version.</summary>
+        Version,
+
+        /// <summary>Root --opencli.</summary>
+        OpenCli
+    }
+
     private readonly IReadOnlyList<GlobalOptionDescriptor> _globalOptions;
     private readonly int _maxInitialChars;
 
@@ -25,7 +38,7 @@ public sealed class ArgParser
             return new ParseResult { Success = true, RootFlag = RootFlag.Help };
         }
 
-        int index = 0;
+        var index = 0;
 
         if (IsRootFlag (args[0], out RootFlag rootFlag))
         {
@@ -37,22 +50,22 @@ public sealed class ArgParser
             return new ParseResult { Success = true, RootFlag = rootFlag };
         }
 
-        var commandOptions = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase);
-        var extensionValues = new Dictionary<string, List<string>> (StringComparer.OrdinalIgnoreCase);
-        var arguments = new List<string> ();
+        Dictionary<string, string> commandOptions = new (StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, List<string>> extensionValues = new (StringComparer.OrdinalIgnoreCase);
+        List<string> arguments = new ();
         string? alias = null;
         string? initial = null;
         string? title = null;
-        bool json = false;
+        var json = false;
         TimeSpan? timeout = null;
-        bool fullscreen = false;
-        bool cat = false;
+        var fullscreen = false;
+        var cat = false;
         string? outputPath = null;
         int? rows = null;
 
         while (index < args.Length)
         {
-            string token = args[index];
+            var token = args[index];
 
             if (alias is null && !token.StartsWith ('-'))
             {
@@ -68,7 +81,8 @@ public sealed class ArgParser
                 continue;
             }
 
-            if (TryParseFrameworkOption (args, ref index, token, ref initial, ref title, ref json, ref timeout, ref fullscreen, ref cat, ref outputPath, ref rows, out string? frameworkError))
+            if (TryParseFrameworkOption (args, ref index, token, ref initial, ref title, ref json, ref timeout,
+                    ref fullscreen, ref cat, ref outputPath, ref rows, out var frameworkError))
             {
                 if (frameworkError is not null)
                 {
@@ -80,7 +94,8 @@ public sealed class ArgParser
 
             if (TryFindGlobalOption (token, out GlobalOptionDescriptor? globalOption))
             {
-                if (!AddOptionValue (args, ref index, token, globalOption!.Name, globalOption.IsFlag, globalOption.Repeatable, extensionValues, out string? extensionError))
+                if (!AddOptionValue (args, ref index, token, globalOption!.Name, globalOption.IsFlag,
+                        globalOption.Repeatable, extensionValues, out var extensionError))
                 {
                     return ParseResult.Fail (extensionError ?? $"Invalid option '{token}'.");
                 }
@@ -88,11 +103,13 @@ public sealed class ArgParser
                 continue;
             }
 
-            if (command is not null && TryFindCommandOption (command, token, out CommandOptionDescriptor? commandOption))
+            if (command is not null &&
+                TryFindCommandOption (command, token, out CommandOptionDescriptor? commandOption))
             {
-                bool isFlag = commandOption!.ValueType == typeof (bool);
+                var isFlag = commandOption!.ValueType == typeof (bool);
 
-                if (!AddCommandOptionValue (args, ref index, token, commandOption.Name, isFlag, commandOptions, out string? commandError))
+                if (!AddCommandOptionValue (args, ref index, token, commandOption.Name, isFlag, commandOptions,
+                        out var commandError))
                 {
                     return ParseResult.Fail (commandError ?? $"Invalid option '{token}'.");
                 }
@@ -134,12 +151,12 @@ public sealed class ArgParser
             }
         }
 
-        var extensions = extensionValues.ToDictionary (
+        Dictionary<string, IReadOnlyList<string>> extensions = extensionValues.ToDictionary (
             static pair => pair.Key,
             static pair => (IReadOnlyList<string>)pair.Value,
             StringComparer.OrdinalIgnoreCase);
 
-        var options = new CommandRunOptions
+        CommandRunOptions options = new ()
         {
             Initial = initial,
             Title = title,
@@ -173,10 +190,10 @@ public sealed class ArgParser
             return false;
         }
 
-        string suffix = input.EndsWith ("ms", StringComparison.OrdinalIgnoreCase) ? "ms" : input[^1..].ToLowerInvariant ();
-        string numberText = suffix == "ms" ? input[..^2] : input[..^1];
+        var suffix = input.EndsWith ("ms", StringComparison.OrdinalIgnoreCase) ? "ms" : input[^1..].ToLowerInvariant ();
+        var numberText = suffix == "ms" ? input[..^2] : input[..^1];
 
-        if (!double.TryParse (numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out double value)
+        if (!double.TryParse (numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
             || !double.IsFinite (value)
             || value < 0)
         {
@@ -243,7 +260,7 @@ public sealed class ArgParser
                 index++;
                 return true;
             case "--timeout":
-                if (!ReadValue (args, ref index, token, out string? timeoutText, out error))
+                if (!ReadValue (args, ref index, token, out var timeoutText, out error))
                 {
                     return true;
                 }
@@ -267,12 +284,13 @@ public sealed class ArgParser
             case "--output" or "-o":
                 return ReadValue (args, ref index, token, out outputPath, out error);
             case "--rows":
-                if (!ReadValue (args, ref index, token, out string? rowsText, out error))
+                if (!ReadValue (args, ref index, token, out var rowsText, out error))
                 {
                     return true;
                 }
 
-                if (!int.TryParse (rowsText, NumberStyles.None, CultureInfo.InvariantCulture, out int parsedRows) || parsedRows <= 0)
+                if (!int.TryParse (rowsText, NumberStyles.None, CultureInfo.InvariantCulture, out var parsedRows) ||
+                    parsedRows <= 0)
                 {
                     error = $"Invalid rows value '{rowsText}'.";
                     return true;
@@ -287,13 +305,15 @@ public sealed class ArgParser
 
     private bool TryFindGlobalOption (string token, out GlobalOptionDescriptor? option)
     {
-        option = _globalOptions.FirstOrDefault (candidate => MatchesOption (token, candidate.Name, candidate.ShortName));
+        option = _globalOptions.FirstOrDefault (candidate =>
+            MatchesOption (token, candidate.Name, candidate.ShortName));
         return option is not null;
     }
 
     private static bool TryFindCommandOption (ICliCommand command, string token, out CommandOptionDescriptor? option)
     {
-        option = command.Options.FirstOrDefault (candidate => MatchesOption (token, candidate.Name, candidate.ShortName));
+        option =
+            command.Options.FirstOrDefault (candidate => MatchesOption (token, candidate.Name, candidate.ShortName));
         return option is not null;
     }
 
@@ -418,18 +438,5 @@ public sealed class ArgParser
         {
             return new ParseResult { Success = false, Error = error };
         }
-    }
-
-    /// <summary>Root flags that exit without command dispatch.</summary>
-    public enum RootFlag
-    {
-        /// <summary>Root --help or -h.</summary>
-        Help,
-
-        /// <summary>Root --version.</summary>
-        Version,
-
-        /// <summary>Root --opencli.</summary>
-        OpenCli
     }
 }

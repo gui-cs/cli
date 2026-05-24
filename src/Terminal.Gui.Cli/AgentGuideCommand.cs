@@ -32,13 +32,15 @@ public sealed class AgentGuideCommand : IViewerCommand
     public IReadOnlyList<CommandOptionDescriptor> Options { get; } = [];
 
     /// <inheritdoc />
-    public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options, CancellationToken cancellationToken)
+    public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+        CancellationToken cancellationToken)
     {
         return Task.FromResult (new CommandResult (CommandStatus.Ok, _markdown, null, null));
     }
 
     /// <inheritdoc />
-    public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout, CancellationToken cancellationToken)
+    public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull (stdout);
         stdout.Write (_markdown);

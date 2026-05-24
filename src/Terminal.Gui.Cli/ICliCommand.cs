@@ -27,10 +27,13 @@ public interface ICliCommand
     bool AcceptsPositionalArgs => false;
 
     /// <summary>
-    /// Validates the --initial value before Terminal.Gui starts. The default permits any value;
-    /// commands override this method when they need command-specific validation.
+    ///     Validates the --initial value before Terminal.Gui starts. The default permits any value;
+    ///     commands override this method when they need command-specific validation.
     /// </summary>
-    bool TryValidateInitial (string initial, CommandRunOptions options) => true;
+    bool TryValidateInitial (string initial, CommandRunOptions options)
+    {
+        return true;
+    }
 
     /// <summary>Runs the command after the host has initialized Terminal.Gui.</summary>
     Task<CommandResult> RunAsync (

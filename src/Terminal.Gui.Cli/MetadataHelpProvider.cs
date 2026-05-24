@@ -10,7 +10,7 @@ public sealed class MetadataHelpProvider : IHelpProvider
     {
         ArgumentNullException.ThrowIfNull (registry);
 
-        var builder = new StringBuilder ();
+        StringBuilder builder = new ();
         builder.AppendLine ("Commands:");
 
         foreach (ICliCommand command in registry.All)
@@ -37,7 +37,7 @@ public sealed class MetadataHelpProvider : IHelpProvider
     {
         ArgumentNullException.ThrowIfNull (command);
 
-        var builder = new StringBuilder ();
+        StringBuilder builder = new ();
         builder.AppendLine ($"# {command.PrimaryAlias}");
         builder.AppendLine (command.Description);
 
@@ -48,7 +48,7 @@ public sealed class MetadataHelpProvider : IHelpProvider
 
             foreach (CommandOptionDescriptor option in command.Options)
             {
-                string shortName = option.ShortName is null ? string.Empty : $" -{option.ShortName},";
+                var shortName = option.ShortName is null ? string.Empty : $" -{option.ShortName},";
                 builder.AppendLine ($" {shortName} --{option.Name}\t{option.Description}");
             }
         }

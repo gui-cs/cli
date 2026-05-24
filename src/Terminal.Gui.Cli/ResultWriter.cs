@@ -4,13 +4,14 @@ namespace Terminal.Gui.Cli;
 public static class ResultWriter
 {
     /// <summary>Writes <paramref name="result" /> and returns false when output file creation fails.</summary>
-    public static bool Write (CommandResult result, bool jsonOutput, TextWriter stdout, TextWriter stderr, string? outputPath = null)
+    public static bool Write (CommandResult result, bool jsonOutput, TextWriter stdout, TextWriter stderr,
+        string? outputPath = null)
     {
         ArgumentNullException.ThrowIfNull (stdout);
         ArgumentNullException.ThrowIfNull (stderr);
 
-        string text = jsonOutput ? ToEnvelope (result).ToJson () : ToPlainText (result);
-        bool writeToOutput = result.Status is CommandStatus.Ok or CommandStatus.NoResult;
+        var text = jsonOutput ? ToEnvelope (result).ToJson () : ToPlainText (result);
+        var writeToOutput = result.Status is CommandStatus.Ok or CommandStatus.NoResult;
         TextWriter writer = result.Status == CommandStatus.Error && !jsonOutput ? stderr : stdout;
 
         if (writeToOutput && outputPath is not null)
@@ -48,7 +49,8 @@ public static class ResultWriter
             CommandStatus.Ok => JsonEnvelope.Ok (result.Value),
             CommandStatus.Cancelled => JsonEnvelope.Cancelled (),
             CommandStatus.NoResult => JsonEnvelope.NoResult (),
-            CommandStatus.Error => JsonEnvelope.Error (result.ErrorCode ?? "error", result.ErrorMessage ?? "Command failed."),
+            CommandStatus.Error => JsonEnvelope.Error (result.ErrorCode ?? "error",
+                result.ErrorMessage ?? "Command failed."),
             _ => JsonEnvelope.Error ("error", "Command failed.")
         };
     }

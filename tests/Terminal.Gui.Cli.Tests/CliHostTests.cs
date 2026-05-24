@@ -1,5 +1,5 @@
-using Xunit;
 using Terminal.Gui.App;
+using Xunit;
 
 namespace Terminal.Gui.Cli.Tests;
 
@@ -8,15 +8,15 @@ public sealed class CliHostTests
     [Fact]
     public async Task RunAsync_OpenCli_WritesRegisteredBuiltIns ()
     {
-        var host = new CliHost (options =>
+        CliHost host = new (options =>
         {
             options.ApplicationName = "sample";
             options.Version = "1.2.3";
         });
-        using var stdout = new StringWriter ();
-        using var stderr = new StringWriter ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
 
-        int exitCode = await host.RunAsync (["--opencli"], TestContext.Current.CancellationToken, stdout, stderr);
+        var exitCode = await host.RunAsync (["--opencli"], TestContext.Current.CancellationToken, stdout, stderr);
 
         Assert.Equal (ExitCodes.Ok, exitCode);
         Assert.Contains ("\"name\":\"sample\"", stdout.ToString ());
@@ -27,15 +27,16 @@ public sealed class CliHostTests
     [Fact]
     public async Task RunAsync_AgentGuideCat_WritesLiteralWithoutStartingTui ()
     {
-        var host = new CliHost (options =>
+        CliHost host = new (options =>
         {
             options.AgentGuide = "# Guide";
             options.AgentGuideIsResource = false;
         });
-        using var stdout = new StringWriter ();
-        using var stderr = new StringWriter ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
 
-        int exitCode = await host.RunAsync (["agent-guide", "--cat"], TestContext.Current.CancellationToken, stdout, stderr);
+        var exitCode = await host.RunAsync (["agent-guide", "--cat"], TestContext.Current.CancellationToken, stdout,
+            stderr);
 
         Assert.Equal (ExitCodes.Ok, exitCode);
         Assert.Equal ("# Guide", stdout.ToString ());
@@ -45,14 +46,14 @@ public sealed class CliHostTests
     [Fact]
     public async Task RunAsync_CommandCancellation_ReturnsCancelledExitCode ()
     {
-        var host = new CliHost ();
+        CliHost host = new ();
         host.Registry.Register (new CancellingCatCommand ());
-        using var stdout = new StringWriter ();
-        using var stderr = new StringWriter ();
-        using var cancellation = new CancellationTokenSource ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+        using CancellationTokenSource cancellation = new ();
         cancellation.Cancel ();
 
-        int exitCode = await host.RunAsync (["cancel", "--cat"], cancellation.Token, stdout, stderr);
+        var exitCode = await host.RunAsync (["cancel", "--cat"], cancellation.Token, stdout, stderr);
 
         Assert.Equal (ExitCodes.Cancelled, exitCode);
         Assert.Equal (string.Empty, stdout.ToString ());
@@ -73,12 +74,14 @@ public sealed class CliHostTests
 
         public IReadOnlyList<CommandOptionDescriptor> Options { get; } = [];
 
-        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options, CancellationToken cancellationToken)
+        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+            CancellationToken cancellationToken)
         {
             throw new OperationCanceledException (cancellationToken);
         }
 
-        public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout, CancellationToken cancellationToken)
+        public Task<CommandResult?> RenderCatAsync (CommandRunOptions options, TextWriter stdout,
+            CancellationToken cancellationToken)
         {
             throw new OperationCanceledException (cancellationToken);
         }

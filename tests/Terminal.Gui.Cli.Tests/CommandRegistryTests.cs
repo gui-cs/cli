@@ -8,8 +8,8 @@ public sealed class CommandRegistryTests
     [Fact]
     public void Register_ResolvesAliasesCaseInsensitively ()
     {
-        var registry = new CommandRegistry ();
-        var command = new TestCommand ("pick", ["pick", "select"]);
+        CommandRegistry registry = new ();
+        TestCommand command = new ("pick", ["pick", "select"]);
 
         registry.Register (command);
 
@@ -20,10 +20,11 @@ public sealed class CommandRegistryTests
     [Fact]
     public void Register_RejectsDuplicateAliasesCaseInsensitively ()
     {
-        var registry = new CommandRegistry ();
+        CommandRegistry registry = new ();
         registry.Register (new TestCommand ("pick", ["pick"]));
 
-        Assert.Throws<InvalidOperationException> (() => registry.Register (new TestCommand ("other", ["PICK", "other"])));
+        Assert.Throws<InvalidOperationException> (() =>
+            registry.Register (new TestCommand ("other", ["PICK", "other"])));
     }
 
     private sealed class TestCommand (string primaryAlias, IReadOnlyList<string> aliases) : ICliCommand
@@ -40,7 +41,8 @@ public sealed class CommandRegistryTests
 
         public IReadOnlyList<CommandOptionDescriptor> Options { get; } = [];
 
-        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options, CancellationToken cancellationToken)
+        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
+            CancellationToken cancellationToken)
         {
             return Task.FromResult (new CommandResult (CommandStatus.Ok, "ok", null, null));
         }

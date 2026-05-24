@@ -8,7 +8,7 @@ public sealed class OutputTests
     [Fact]
     public void JsonEnvelope_ToJson_UsesCamelCaseAndOmitsNulls ()
     {
-        string json = JsonEnvelope.Ok ("value").ToJson ();
+        var json = JsonEnvelope.Ok ("value").ToJson ();
 
         using JsonDocument document = JsonDocument.Parse (json);
         Assert.Equal (1, document.RootElement.GetProperty ("schemaVersion").GetInt32 ());
@@ -20,10 +20,11 @@ public sealed class OutputTests
     [Fact]
     public void ResultWriter_WritesErrorsToStderrInPlainText ()
     {
-        using var stdout = new StringWriter ();
-        using var stderr = new StringWriter ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
 
-        bool success = ResultWriter.Write (new CommandResult (CommandStatus.Error, null, "validation", "bad"), false, stdout, stderr);
+        var success = ResultWriter.Write (new CommandResult (CommandStatus.Error, null, "validation", "bad"), false,
+            stdout, stderr);
 
         Assert.True (success);
         Assert.Equal (string.Empty, stdout.ToString ());
@@ -34,6 +35,7 @@ public sealed class OutputTests
     public void TerminalEscapeSanitizer_RemovesOscAndPreservesRenderedSgr ()
     {
         Assert.Equal ("title", TerminalEscapeSanitizer.Sanitize ("\u001b]0;bad\u0007title"));
-        Assert.Equal ("\u001b[1mstrong\u001b[0m", TerminalEscapeSanitizer.SanitizeRenderedOutput ("\u001b[1mstrong\u001b[0m"));
+        Assert.Equal ("\u001b[1mstrong\u001b[0m",
+            TerminalEscapeSanitizer.SanitizeRenderedOutput ("\u001b[1mstrong\u001b[0m"));
     }
 }
