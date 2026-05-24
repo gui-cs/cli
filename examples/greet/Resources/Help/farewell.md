@@ -2,6 +2,8 @@
 
 Say goodbye to someone.
 
+[Back to main help](help:help)
+
 ## Usage
 
 ```

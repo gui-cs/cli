@@ -2,6 +2,8 @@
 
 Display application information in a TUI markdown viewer.
 
+[Back to main help](help:help)
+
 ## Usage
 
 ```

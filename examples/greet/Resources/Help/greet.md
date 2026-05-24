@@ -2,6 +2,8 @@
 
 Prompt for a name and return a greeting.
 
+[Back to main help](help:help)
+
 ## Usage
 
 ```

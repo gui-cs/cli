@@ -59,6 +59,23 @@ public sealed class HelpCommand : IViewerCommand
             Height = Dim.Fill (1)
         };
 
+        markdownView.LinkClicked += (_, e) =>
+        {
+            if (e.Url is not null && e.Url.StartsWith ("help:", StringComparison.OrdinalIgnoreCase))
+            {
+                var topic = e.Url["help:".Length..];
+                var topicMarkdown = ResolveHelpTopic (topic);
+
+                if (topicMarkdown is not null)
+                {
+                    markdownView.Text = topicMarkdown;
+                    window.Title = $"Help - {topic}";
+                }
+
+                e.Handled = true;
+            }
+        };
+
         StatusBar statusBar = new (
         [
             new Shortcut (Application.GetDefaultKey (Command.Quit), "Quit", window.RequestStop)
@@ -93,5 +110,22 @@ public sealed class HelpCommand : IViewerCommand
 
         return _helpProvider.GetRootHelp (_registry) ??
                new MetadataHelpProvider ().GetRootHelp (_registry) ?? string.Empty;
+    }
+
+    private string? ResolveHelpTopic (string topic)
+    {
+        if (topic.Equals ("help", StringComparison.OrdinalIgnoreCase))
+        {
+            return _helpProvider.GetRootHelp (_registry) ??
+                   new MetadataHelpProvider ().GetRootHelp (_registry);
+        }
+
+        if (_registry.TryResolve (topic, out ICliCommand? command) && command is not null)
+        {
+            return _helpProvider.GetCommandHelp (command) ??
+                   new MetadataHelpProvider ().GetCommandHelp (command);
+        }
+
+        return null;
     }
 }

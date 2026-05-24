@@ -27,13 +27,18 @@ public sealed class FarewellCommand : ICliCommand<string>
     ];
 
     /// <inheritdoc />
+    public bool AcceptsPositionalArgs => true;
+
+    /// <inheritdoc />
     public Task<CommandResult<string>> RunAsync (
         IApplication app,
         string? initial,
         CommandRunOptions options,
         CancellationToken cancellationToken)
     {
-        var name = initial ?? "World";
+        var name = options.Arguments.Count > 0
+            ? string.Join (" ", options.Arguments)
+            : initial ?? "World";
         var until = options.CommandOptions.TryGetValue ("until", out var untilValue)
             ? untilValue
             : null;

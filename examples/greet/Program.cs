@@ -8,6 +8,7 @@ CliHost host = new (options =>
 {
     options.ApplicationName = "greet";
     options.Version = "1.0.0";
+    options.DefaultCommand = "greet";
     options.AgentGuide = "Terminal.Gui.Cli.Greet.agent-guide.md";
     options.AgentGuideIsResource = true;
     options.ResourceAssembly = assembly;
