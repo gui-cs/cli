@@ -108,7 +108,11 @@ public sealed class CliHost
         }
         catch (OperationCanceledException)
         {
-            result = new CommandResult (CommandStatus.Cancelled, null, null, null);
+            result = new CommandResult (
+                Status: CommandStatus.Cancelled,
+                Value: null,
+                ErrorCode: null,
+                ErrorMessage: null);
         }
 
         if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath))
