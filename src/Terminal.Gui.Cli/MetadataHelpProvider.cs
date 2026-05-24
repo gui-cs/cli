@@ -11,23 +11,25 @@ public sealed class MetadataHelpProvider : IHelpProvider
         ArgumentNullException.ThrowIfNull (registry);
 
         StringBuilder builder = new ();
-        builder.AppendLine ("Commands:");
+        builder.AppendLine ("## Commands");
+        builder.AppendLine ();
 
         foreach (ICliCommand command in registry.All)
         {
-            builder.AppendLine ($"  {command.PrimaryAlias}\t{command.Description}");
+            builder.AppendLine ($"- `{command.PrimaryAlias}` — {command.Description}");
         }
 
         builder.AppendLine ();
-        builder.AppendLine ("Framework options:");
-        builder.AppendLine ("  --help, -h");
-        builder.AppendLine ("  --version");
-        builder.AppendLine ("  --opencli");
-        builder.AppendLine ("  --json");
-        builder.AppendLine ("  --initial <value>");
-        builder.AppendLine ("  --title, --prompt <value>");
-        builder.AppendLine ("  --timeout <duration>");
-        builder.AppendLine ("  --cat");
+        builder.AppendLine ("## Framework options");
+        builder.AppendLine ();
+        builder.AppendLine ("- `--help`, `-h`");
+        builder.AppendLine ("- `--version`");
+        builder.AppendLine ("- `--opencli`");
+        builder.AppendLine ("- `--json`");
+        builder.AppendLine ("- `--initial <value>`");
+        builder.AppendLine ("- `--title`, `--prompt <value>`");
+        builder.AppendLine ("- `--timeout <duration>`");
+        builder.AppendLine ("- `--cat`");
 
         return builder.ToString ();
     }
