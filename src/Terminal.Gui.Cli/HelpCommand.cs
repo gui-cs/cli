@@ -1,4 +1,5 @@
 using Terminal.Gui.App;
+using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 
 namespace Terminal.Gui.Cli;
@@ -43,11 +44,27 @@ public sealed class HelpCommand : IViewerCommand
     {
         var markdown = ResolveHelp (options);
 
-        RunnableWrapper<Markdown, object?> wrapper = new ();
-        wrapper.GetWrappedView ().Text = markdown;
-        wrapper.Title = options.Title ?? "Help";
+        Runnable window = new ()
+        {
+            Title = options.Title ?? "Help",
+            Width = Dim.Fill (),
+            Height = Dim.Fill ()
+        };
 
-        await app.RunAsync (wrapper, cancellationToken);
+        Markdown markdownView = new ()
+        {
+            Width = Dim.Fill (),
+            Height = Dim.Fill ()
+        };
+
+        window.Add (markdownView);
+
+        window.Initialized += (_, _) =>
+        {
+            markdownView.Text = markdown;
+        };
+
+        await app.RunAsync (window, cancellationToken);
 
         return new CommandResult (CommandStatus.Ok, null, null, null);
     }
