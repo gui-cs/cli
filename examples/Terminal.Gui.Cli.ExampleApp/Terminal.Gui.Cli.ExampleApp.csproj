@@ -11,4 +11,8 @@
     <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\agent-guide.md" LogicalName="Terminal.Gui.Cli.ExampleApp.agent-guide.md" />
+  </ItemGroup>
+
 </Project>
