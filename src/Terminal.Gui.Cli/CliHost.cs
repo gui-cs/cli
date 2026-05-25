@@ -164,7 +164,8 @@ public sealed class CliHost
             result = CreateCancelledResult ();
         }
 
-        if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath))
+        if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
+                _options.ResultJsonResolver))
         {
             return ExitCodes.UsageError;
         }
