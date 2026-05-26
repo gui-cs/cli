@@ -62,12 +62,13 @@ public static class MarkdownRenderer
             height = 24;
         }
 
+        var previousDriverIO = Environment.GetEnvironmentVariable ("DisableRealDriverIO");
         Environment.SetEnvironmentVariable ("DisableRealDriverIO", "1");
         IApplication app = Application.Create ();
-        app.Init (DriverRegistry.Names.ANSI);
 
         try
         {
+            app.Init (DriverRegistry.Names.ANSI);
             app.Driver?.SetScreenSize (width, height);
 
             Markdown markdownView = new ()
@@ -99,6 +100,7 @@ public static class MarkdownRenderer
         finally
         {
             app.Dispose ();
+            Environment.SetEnvironmentVariable ("DisableRealDriverIO", previousDriverIO);
 
             if (previousEncoding is not null)
             {
