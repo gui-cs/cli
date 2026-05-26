@@ -147,9 +147,18 @@ public sealed class CliHost
                 return ExitCodes.Cancelled;
             }
 
-            if (catResult is not null)
+            if (catResult is { } cat)
             {
-                return ExitCodes.FromResult (catResult.Value);
+                // RenderCatAsync writes its own rendered output for successful results. For
+                // non-success results it produced no output, so surface the diagnostic (to stderr
+                // in plain text, or the error envelope under --json) instead of exiting silently.
+                if (cat.Status is not (CommandStatus.Ok or CommandStatus.NoResult))
+                {
+                    ResultWriter.Write (cat, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
+                        _options.ResultJsonResolver);
+                }
+
+                return ExitCodes.FromResult (cat);
             }
         }
 

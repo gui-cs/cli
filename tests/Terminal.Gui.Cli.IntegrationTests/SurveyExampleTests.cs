@@ -116,4 +116,19 @@ public sealed class SurveyExampleTests
         Assert.Equal (ExitCodes.Ok, exitCode);
         Assert.Contains ("Ada Lovelace", stdout.ToString ());
     }
+
+    [Fact]
+    public async Task Card_Cat_InvalidAge_SurfacesErrorToStderr ()
+    {
+        string[] args = ["card", "--name", "Ada", "--age", "999", "--cat"];
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await SurveyApp.CreateHost ()
+            .RunAsync (args, TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.ValidationError, exitCode);
+        Assert.Contains ("Invalid age", stderr.ToString ());
+        Assert.Equal (string.Empty, stdout.ToString ());
+    }
 }
