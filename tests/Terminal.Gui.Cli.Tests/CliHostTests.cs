@@ -44,6 +44,52 @@ public sealed class CliHostTests
     }
 
     [Fact]
+    public async Task RunAsync_HelpFlag_RendersMarkdownAsAnsi ()
+    {
+        CliHost host = new (options =>
+        {
+            options.ApplicationName = "sample";
+            options.Version = "1.0.0";
+        });
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await host.RunAsync (["--help"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Equal (string.Empty, stderr.ToString ());
+
+        var output = stdout.ToString ();
+
+        // ANSI escape sequences should be present (rendered markdown)
+        Assert.Contains ("\x1b[", output);
+
+        // Should contain the command name from the registry
+        Assert.Contains ("help", output);
+    }
+
+    [Fact]
+    public async Task RunAsync_HelpCat_RendersMarkdownAsAnsi ()
+    {
+        CliHost host = new ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await host.RunAsync (["help", "--cat"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Equal (string.Empty, stderr.ToString ());
+
+        var output = stdout.ToString ();
+
+        // ANSI escape sequences should be present (rendered markdown)
+        Assert.Contains ("\x1b[", output);
+
+        // Should contain the command name from the registry
+        Assert.Contains ("help", output);
+    }
+
+    [Fact]
     public async Task RunAsync_CommandCancellation_ReturnsCancelledExitCode ()
     {
         CliHost host = new ();
@@ -57,45 +103,6 @@ public sealed class CliHostTests
 
         Assert.Equal (ExitCodes.Cancelled, exitCode);
         Assert.Equal (string.Empty, stdout.ToString ());
-        Assert.Equal (string.Empty, stderr.ToString ());
-    }
-
-    [Fact]
-    public async Task RunAsync_HelpFlag_RendersMarkdownAsAnsi ()
-    {
-        CliHost host = new (options =>
-        {
-            options.ApplicationName = "test-app";
-            options.Version = "1.0.0";
-        });
-        using StringWriter stdout = new ();
-        using StringWriter stderr = new ();
-
-        var exitCode = await host.RunAsync (["--help"], TestContext.Current.CancellationToken, stdout, stderr);
-
-        Assert.Equal (ExitCodes.Ok, exitCode);
-        var output = stdout.ToString ();
-        // MarkdownRenderer.RenderToAnsi produces ANSI escape sequences
-        Assert.Contains ("\x1b[", output);
-        Assert.Equal (string.Empty, stderr.ToString ());
-    }
-
-    [Fact]
-    public async Task RunAsync_HelpCat_RendersMarkdownAsAnsi ()
-    {
-        CliHost host = new (options =>
-        {
-            options.ApplicationName = "test-app";
-            options.Version = "1.0.0";
-        });
-        using StringWriter stdout = new ();
-        using StringWriter stderr = new ();
-
-        var exitCode = await host.RunAsync (["help", "--cat"], TestContext.Current.CancellationToken, stdout, stderr);
-
-        Assert.Equal (ExitCodes.Ok, exitCode);
-        var output = stdout.ToString ();
-        Assert.Contains ("\x1b[", output);
         Assert.Equal (string.Empty, stderr.ToString ());
     }
 
