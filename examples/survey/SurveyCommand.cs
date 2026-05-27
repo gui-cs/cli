@@ -114,7 +114,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = Pos.Right (nameLabel) + 1,
             Y = 0,
-            Width = Dim.Fill ()
+            Width = Dim.Percent (50)
         };
         nameStep.Add (nameLabel, nameField);
         wizard.AddStep (nameStep);
@@ -180,7 +180,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = Pos.Right (sportOrLabel) + 1,
             Y = Pos.Bottom (sportSelector) + 1,
-            Width = Dim.Fill ()
+            Width = Dim.Percent (50)
         };
 
         sportSelector.ValueChanged += (_, args) =>
@@ -213,7 +213,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = Pos.Right (ageLabel) + 1,
             Y = 0,
-            Width = Dim.Fill ()
+            Width = Dim.Percent (50)
         };
         Label ageError = new ()
         {
@@ -232,7 +232,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = Pos.Right (passwordLabel) + 1,
             Y = 0,
-            Width = Dim.Fill (),
+            Width = Dim.Percent (50),
             Secret = true
         };
         passwordStep.Add (passwordLabel, passwordField);
@@ -293,7 +293,17 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             {
                 SurveyAnswers preview = BuildAnswers (
                     nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
-                confirmView.Renderable = SpectreProfile.Build (preview);
+
+                // Get the background color from the wizard step so the table blends in
+                var attr = confirmStep!.GetAttributeForRole (Drawing.VisualRole.Normal);
+                Spectre.Console.Color? spectreBg = null;
+
+                if (attr is { Background: var tgBg } && tgBg != Drawing.Color.None)
+                {
+                    spectreBg = new Spectre.Console.Color (tgBg.R, tgBg.G, tgBg.B);
+                }
+
+                confirmView.Renderable = SpectreProfile.Build (preview, spectreBg);
             }
         };
 

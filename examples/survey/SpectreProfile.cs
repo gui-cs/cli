@@ -12,7 +12,13 @@ namespace Terminal.Gui.Cli.Survey;
 public static class SpectreProfile
 {
     /// <summary>Builds the results table renderable describing the profile.</summary>
-    public static IRenderable Build (SurveyAnswers answers)
+    /// <param name="answers">The survey answers to render.</param>
+    /// <param name="backgroundColor">
+    ///     Optional background color for the table borders and padding. When rendering inside
+    ///     a Terminal.Gui view (e.g. the confirm step), pass the superview's background so
+    ///     the table blends in. Not used for final stdout output.
+    /// </param>
+    public static IRenderable Build (SurveyAnswers answers, Color? backgroundColor = null)
     {
         ArgumentNullException.ThrowIfNull (answers);
 
@@ -20,6 +26,11 @@ public static class SpectreProfile
             .Border (TableBorder.Rounded)
             .AddColumn (new TableColumn ("[bold]Question[/]"))
             .AddColumn (new TableColumn ("[bold]Answer[/]"));
+
+        if (backgroundColor is not null)
+        {
+            table.BorderColor (backgroundColor.Value);
+        }
 
         table.AddRow (new Markup ("Name"), new Markup ($"[green]{Markup.Escape (answers.Name)}[/]"));
 
