@@ -11,8 +11,12 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseLocalTerminalGui)' != 'true'">
     <PackageReference Include="Terminal.Gui" Version="$(TerminalGuiVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalTerminalGui)' == 'true'">
+    <ProjectReference Include="$(LocalTerminalGuiPath)" />
   </ItemGroup>
 
 </Project>

@@ -25,6 +25,10 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Temporarily use local Terminal.Gui build for wizard fix testing -->
+    <UseLocalTerminalGui>true</UseLocalTerminalGui>
+    <LocalTerminalGuiPath>D:\s\copilot-worktrees\Terminal.Gui\copilot-fix-wizard-next-finish-button\Terminal.Gui\Terminal.Gui.csproj</LocalTerminalGuiPath>
   </PropertyGroup>
 
   <ItemGroup>
