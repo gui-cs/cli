@@ -41,6 +41,32 @@ public static class SpectreProfile
         return panel;
     }
 
+    /// <summary>Builds the results table without the outer panel border (for embedded use).</summary>
+    public static IRenderable BuildTable (SurveyAnswers answers)
+    {
+        ArgumentNullException.ThrowIfNull (answers);
+
+        Table table = new Table ()
+            .Border (TableBorder.Rounded)
+            .AddColumn (new TableColumn ("[bold]Question[/]"))
+            .AddColumn (new TableColumn ("[bold]Answer[/]"));
+
+        table.AddRow (new Markup ("Name"), new Markup ($"[green]{Markup.Escape (answers.Name)}[/]"));
+
+        var favFruit = answers.FavoriteFruit ?? "none";
+        table.AddRow (new Markup ("Favorite fruit"), new Markup (Markup.Escape (favFruit)));
+        table.AddRow (new Markup ("Favorite sport"), new Markup (Markup.Escape (answers.Sport)));
+        table.AddRow (new Markup ("Age"), new Markup (answers.Age.ToString (CultureInfo.InvariantCulture)));
+
+        var password = answers.Password.Length > 0 ? new string ('*', answers.Password.Length) : "[grey]none[/]";
+        table.AddRow (new Markup ("Password"), new Markup (password));
+
+        var color = answers.Color is null ? "[grey]unspecified[/]" : Markup.Escape (answers.Color);
+        table.AddRow (new Markup ("Favorite color"), new Markup (color));
+
+        return table;
+    }
+
     /// <summary>Renders the profile to <paramref name="writer" /> as ANSI (or plain text when not a terminal).</summary>
     public static void RenderToAnsi (SurveyAnswers answers, TextWriter writer)
     {

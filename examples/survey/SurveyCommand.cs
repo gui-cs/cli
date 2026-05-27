@@ -293,7 +293,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             {
                 SurveyAnswers preview = BuildAnswers (
                     nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
-                confirmView.Renderable = SpectreProfile.Build (preview);
+                confirmView.Renderable = SpectreProfile.BuildTable (preview);
             }
         };
 
