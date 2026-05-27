@@ -12,7 +12,7 @@ An input command that collects a profile and returns it as structured data.
 - **Kind:** Input
 - **Result type:** `object` (`SurveyAnswers`)
 - **Options:** `--name`/`-n`, `--fruits`/`-f` (comma-separated), `--sport`/`-s`,
-  `--age`/`-a` (1-120), `--color`/`-c`
+  `--age`/`-a` (1-120), `--password`/`-p`, `--color`/`-c`
 
 **Usage:**
 
@@ -21,20 +21,6 @@ survey --name Ada --age 36 --sport Fencing --fruits "Apple,Cherry" --json
 ```
 
 Provide `--name` to run headless (no TUI). Use `--json` for the structured envelope.
-
-### card
-
-A viewer command that renders a profile as a Spectre.Console card.
-
-- **Alias:** `card`
-- **Kind:** Viewer
-- **Supports `--cat`:** Yes
-
-**Usage:**
-
-```bash
-card --name Ada --age 36 --sport Fencing --cat
-```
 
 ## JSON Envelope
 
@@ -48,8 +34,10 @@ source-generated JSON context registered on the host (no reflection):
   "value": {
     "name": "Ada",
     "fruits": ["Apple", "Cherry"],
+    "favoriteFruit": "Apple",
     "sport": "Fencing",
     "age": 36,
+    "password": "Passw0rd!",
     "color": "Teal"
   }
 }

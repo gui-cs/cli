@@ -7,7 +7,7 @@ Collect a profile and return it as structured data.
 ## Usage
 
 ```
-survey                                    Launch the interactive Terminal.Gui form
+survey                                    Launch the interactive Terminal.Gui wizard
 survey --name Ada --age 36 --sport Fencing
 survey --name Ada --fruits "Apple,Cherry" --json
 ```
@@ -20,10 +20,11 @@ survey --name Ada --fruits "Apple,Cherry" --json
 | `--fruits`, `-f` | string | Comma-separated list of favorite fruits. |
 | `--sport`, `-s` | string | Favorite sport. |
 | `--age`, `-a` | integer | Age in years (1-120). |
+| `--password`, `-p` | string | Password (secret). |
 | `--color`, `-c` | string | Favorite color (optional). |
 
 ## Behavior
 
 When `--name` is provided, the command runs headless and returns the profile. With
 `--json` it emits the full `SurveyAnswers` object. With no name in an interactive
-terminal, it launches a Terminal.Gui form (press `F2` to submit).
+terminal, it launches a Terminal.Gui Wizard (press Enter to accept, Esc to quit).

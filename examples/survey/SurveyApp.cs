@@ -23,7 +23,6 @@ public static class SurveyApp
         });
 
         host.Registry.Register (new SurveyCommand ());
-        host.Registry.Register (new CardCommand ());
         return host;
     }
 }

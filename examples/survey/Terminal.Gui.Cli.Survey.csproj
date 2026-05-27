@@ -19,7 +19,6 @@
     <EmbeddedResource Include="Resources\agent-guide.md" LogicalName="Terminal.Gui.Cli.Survey.agent-guide.md" />
     <EmbeddedResource Include="Resources\Help\help.md" LogicalName="help.md" />
     <EmbeddedResource Include="Resources\Help\survey.md" LogicalName="survey.md" />
-    <EmbeddedResource Include="Resources\Help\card.md" LogicalName="card.md" />
   </ItemGroup>
 
 </Project>

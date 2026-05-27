@@ -2,21 +2,23 @@ using System.Globalization;
 
 namespace Terminal.Gui.Cli.Survey;
 
-/// <summary>Shared option descriptors and headless parsing for the survey and card commands.</summary>
+/// <summary>Shared option descriptors and headless parsing for the survey command.</summary>
 public static class ProfileInput
 {
-    /// <summary>Per-command options accepted by both the survey (input) and card (viewer) commands.</summary>
+    /// <summary>Per-command options accepted by the survey command.</summary>
     public static IReadOnlyList<CommandOptionDescriptor> Options { get; } =
     [
         new ("name", "n", typeof (string), "The person's name.", false, null),
         new ("fruits", "f", typeof (string), "Comma-separated list of favorite fruits.", false, null),
         new ("sport", "s", typeof (string), "Favorite sport.", false, null),
         new ("age", "a", typeof (int), "Age in years (1-120).", false, null),
+        new ("password", "p", typeof (string), "Password (secret).", false, null),
         new ("color", "c", typeof (string), "Favorite color (optional).", false, null)
     ];
 
-    /// <summary>A sample profile used when the card command is invoked without any options.</summary>
-    public static SurveyAnswers Sample { get; } = new ("Ada Lovelace", ["Apple", "Cherry"], "Fencing", 36, "Teal");
+    /// <summary>A sample profile used when invoked without options in headless mode.</summary>
+    public static SurveyAnswers Sample { get; } =
+        new ("Ada Lovelace", ["Apple", "Cherry"], "Apple", "Fencing", 36, "Passw0rd!", "Teal");
 
     /// <summary>
     ///     Builds a <see cref="SurveyAnswers" /> from command-line options. Returns false with an
@@ -63,12 +65,20 @@ public static class ProfileInput
             }
         }
 
+        var password = options.CommandOptions.TryGetValue ("password", out var passwordValue) &&
+                       !string.IsNullOrWhiteSpace (passwordValue)
+            ? passwordValue
+            : string.Empty;
+
         var color = options.CommandOptions.TryGetValue ("color", out var colorValue) &&
                     !string.IsNullOrWhiteSpace (colorValue)
             ? colorValue
             : null;
 
-        answers = new SurveyAnswers (name, fruits, sport, age, color);
+        // Determine favorite fruit: first fruit if only one, otherwise null (to be picked interactively)
+        var favoriteFruit = fruits.Length == 1 ? fruits[0] : null;
+
+        answers = new SurveyAnswers (name, fruits, favoriteFruit, sport, age, password, color);
         return true;
     }
 }
