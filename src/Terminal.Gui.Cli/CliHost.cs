@@ -49,6 +49,13 @@ public sealed class CliHost
 
         if (initialParse.RootFlag is { } rootFlag)
         {
+            // When a DefaultCommand is set and args are empty (which maps to Help),
+            // run the default command instead of showing help.
+            if (rootFlag == ArgParser.RootFlag.Help && args.Length == 0 && _options.DefaultCommand is not null)
+            {
+                return await RunWithDefaultCommandAsync (args, cancellationToken, stdout, stderr);
+            }
+
             WriteRootFlag (rootFlag, stdout);
             return ExitCodes.Ok;
         }

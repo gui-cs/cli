@@ -13,7 +13,8 @@ public static class ProfileInput
         new ("sport", "s", typeof (string), "Favorite sport.", false, null),
         new ("age", "a", typeof (int), "Age in years (1-120).", false, null),
         new ("password", "p", typeof (string), "Password (secret).", false, null),
-        new ("color", "c", typeof (string), "Favorite color (optional).", false, null)
+        new ("color", "c", typeof (string), "Favorite color (optional).", false, null),
+        new ("confirm", null, typeof (bool), "Show a confirmation step before finishing.", false, null)
     ];
 
     /// <summary>A sample profile used when invoked without options in headless mode.</summary>
