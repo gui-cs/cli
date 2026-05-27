@@ -159,10 +159,11 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         };
         TextField nameField = new ()
         {
-            X = 0,
-            Y = Pos.Bottom (nameLabel),
+            X = Pos.Right (nameLabel) + 1,
+            Y = 0,
             Width = Dim.Fill ()
         };
+        nameField.Accepting += (_, args) => args.Handled = true;
         nameStep.Add (nameLabel, nameField);
         wizard.AddStep (nameStep);
 
@@ -178,9 +179,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         ListView fruitsList = new ()
         {
             X = 0,
-            Y = Pos.Bottom (fruitsLabel),
+            Y = 1,
             Width = Dim.Fill (),
-            Height = FruitDisplayLabels.Length
+            Height = Dim.Fill ()
         };
         fruitsList.SetSource (new ObservableCollection<string> (
             FruitDisplayLabels.Select ((label, i) =>
@@ -213,9 +214,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         ListView favFruitList = new ()
         {
             X = 0,
-            Y = Pos.Bottom (favFruitLabel),
+            Y = 1,
             Width = Dim.Fill (),
-            Height = Dim.Auto (DimAutoStyle.Content)
+            Height = Dim.Fill ()
         };
         favFruitStep.Add (favFruitLabel, favFruitList);
         wizard.AddStep (favFruitStep);
@@ -231,7 +232,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         OptionSelector sportSelector = new ()
         {
             X = 0,
-            Y = Pos.Bottom (sportLabel),
+            Y = 1,
             Width = Dim.Fill (),
             Labels = ["Soccer", "Hockey", "Basketball"],
             Value = null
@@ -244,10 +245,11 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         };
         TextField sportTextField = new ()
         {
-            X = 0,
-            Y = Pos.Bottom (sportOrLabel),
+            X = Pos.Right (sportOrLabel) + 1,
+            Y = Pos.Bottom (sportSelector) + 1,
             Width = Dim.Fill ()
         };
+        sportTextField.Accepting += (_, args) => args.Handled = true;
 
         sportSelector.ValueChanged += (_, args) =>
         {
@@ -291,10 +293,11 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         };
         TextField ageField = new ()
         {
-            X = 0,
-            Y = Pos.Bottom (ageLabel),
+            X = Pos.Right (ageLabel) + 1,
+            Y = 0,
             Width = Dim.Fill ()
         };
+        ageField.Accepting += (_, args) => args.Handled = true;
         ageStep.Add (ageLabel, ageField);
         wizard.AddStep (ageStep);
 
@@ -308,11 +311,12 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         };
         TextField passwordField = new ()
         {
-            X = 0,
-            Y = Pos.Bottom (passwordLabel),
+            X = Pos.Right (passwordLabel) + 1,
+            Y = 0,
             Width = Dim.Fill (),
             Secret = true
         };
+        passwordField.Accepting += (_, args) => args.Handled = true;
         passwordStep.Add (passwordLabel, passwordField);
         wizard.AddStep (passwordStep);
 
@@ -327,8 +331,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         ColorPicker colorPicker = new ()
         {
             X = 0,
-            Y = Pos.Bottom (colorLabel),
-            Width = Dim.Fill ()
+            Y = 1,
+            Width = Dim.Fill (),
+            Height = Dim.Fill ()
         };
         colorPicker.Style.ShowTextFields = true;
         colorPicker.Style.ShowColorName = true;
@@ -352,9 +357,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             confirmContentLabel = new Label
             {
                 X = 0,
-                Y = Pos.Bottom (confirmLabel) + 1,
+                Y = 2,
                 Width = Dim.Fill (),
-                Height = Dim.Auto (DimAutoStyle.Text)
+                Height = Dim.Fill ()
             };
             confirmStep.Add (confirmLabel, confirmContentLabel);
             wizard.AddStep (confirmStep);
@@ -374,7 +379,6 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                 else
                 {
                     favFruitList.SetSource (new ObservableCollection<string> (selectedFruits));
-                    favFruitList.Height = selectedFruits.Count;
                 }
             }
             else if (confirm && wizard.CurrentStep == confirmStep && confirmContentLabel is not null)

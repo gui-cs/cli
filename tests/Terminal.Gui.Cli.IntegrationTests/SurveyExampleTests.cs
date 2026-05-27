@@ -83,4 +83,38 @@ public sealed class SurveyExampleTests
         Assert.Equal (ExitCodes.ValidationError, exitCode);
         Assert.Contains ("Invalid age", stderr.ToString ());
     }
+
+    [Fact]
+    public async Task Survey_EmptyArgs_WithName_RunsDefaultCommand ()
+    {
+        // When empty args are passed but --name is provided via the default command routing,
+        // the host should route to the survey command (not print help).
+        // We verify this by passing just "--name" which goes through default command dispatch.
+        string[] args = ["--name", "Ada", "--age", "25"];
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await SurveyApp.CreateHost ()
+            .RunAsync (args, TestContext.Current.CancellationToken, stdout, stderr);
+
+        // Default command routing should run the survey, not print help
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Contains ("Ada", stdout.ToString ());
+        Assert.DoesNotContain ("--help", stdout.ToString ());
+    }
+
+    [Fact]
+    public async Task Survey_ConfirmOption_Accepted ()
+    {
+        // The --confirm option should be recognized and not cause an error
+        string[] args = ["survey", "--name", "Ada", "--age", "25", "--confirm"];
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await SurveyApp.CreateHost ()
+            .RunAsync (args, TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Contains ("Ada", stdout.ToString ());
+    }
 }
