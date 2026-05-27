@@ -103,7 +103,8 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Title = "Survey - Enter to accept, Esc to quit",
             Width = Dim.Fill (),
             Height = Fruits.Length + 6, // tall enough for the largest step (fruits list + label + buttons)
-            BorderStyle = LineStyle.Rounded
+            BorderStyle = LineStyle.Rounded,
+            SchemeName = Configuration.SchemeManager.SchemesToSchemeName (Schemes.Accent)
         };
         wizard.Border.Thickness = new Thickness (0, 1, 0, 0);
 
@@ -127,7 +128,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = 0,
             Y = 1,
-            Width = Dim.Fill (),
+            Width = Dim.Auto (),
             Height = Dim.Fill ()
         };
         RefreshFruitDisplay (fruitsList, fruitChecked);
@@ -153,7 +154,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             X = 0,
             Y = 1,
-            Width = Dim.Fill (),
+            Width = Dim.Auto (),
             Height = Dim.Fill ()
         };
         favFruitStep.Add (favFruitLabel, favFruitList);
