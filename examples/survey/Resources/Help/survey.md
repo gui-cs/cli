@@ -22,6 +22,7 @@ survey --name Ada --fruits "Apple,Cherry" --json
 | `--age`, `-a` | integer | Age in years (1-120). |
 | `--password`, `-p` | string | Password (secret). |
 | `--color`, `-c` | string | Favorite color (optional). |
+| `--confirm` | flag | Show a confirmation step before finishing. |
 
 ## Behavior
 

@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Text;
 using Terminal.Gui.App;
 using Terminal.Gui.Drawing;
+using Terminal.Gui.Interop.Spectre;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 
@@ -15,63 +15,20 @@ namespace Terminal.Gui.Cli.Survey;
 /// </summary>
 public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 {
-    private static readonly string[] AllFruits =
+    /// <summary>Fruit catalog: (display label, value for output, whether the row is selectable).</summary>
+    private static readonly (string Label, string Value, bool Selectable)[] Fruits =
     [
-        "Apple",
-        "Apricot",
-        "Banana",
-        "  Blackberry",
-        "  Blueberry",
-        "  Raspberry",
-        "  Strawberry",
-        "Mango",
-        "Orange",
-        "Pear"
-    ];
-
-    private static readonly string[] FruitDisplayLabels =
-    [
-        "Apple",
-        "Apricot",
-        "Banana",
-        "Berries:",
-        "  Blackberry",
-        "  Blueberry",
-        "  Raspberry",
-        "  Strawberry",
-        "Mango",
-        "Orange",
-        "Pear"
-    ];
-
-    private static readonly bool[] FruitIsSelectable =
-    [
-        true, // Apple
-        true, // Apricot
-        true, // Banana
-        false, // Berries: (header)
-        true, // Blackberry
-        true, // Blueberry
-        true, // Raspberry
-        true, // Strawberry
-        true, // Mango
-        true, // Orange
-        true // Pear
-    ];
-
-    private static readonly string[] FruitValues =
-    [
-        "Apple",
-        "Apricot",
-        "Banana",
-        "", // Berries header
-        "Blackberry",
-        "Blueberry",
-        "Raspberry",
-        "Strawberry",
-        "Mango",
-        "Orange",
-        "Pear"
+        ("Apple", "Apple", true),
+        ("Apricot", "Apricot", true),
+        ("Banana", "Banana", true),
+        ("Berries:", "", false),
+        ("    Blackberry", "Blackberry", true),
+        ("    Blueberry", "Blueberry", true),
+        ("    Raspberry", "Raspberry", true),
+        ("    Strawberry", "Strawberry", true),
+        ("Mango", "Mango", true),
+        ("Orange", "Orange", true),
+        ("Pear", "Pear", true)
     ];
 
     /// <inheritdoc />
@@ -145,37 +102,27 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             Title = "Survey - Enter to accept, Esc to quit",
             Width = Dim.Fill (),
+            Height = Fruits.Length + 6, // tall enough for the largest step (fruits list + label + buttons)
             BorderStyle = LineStyle.Rounded
         };
         wizard.Border.Thickness = new Thickness (0, 1, 0, 0);
 
-        // Step 1: Name
+        // --- Step 1: Name ---
         WizardStep nameStep = new () { Title = "Name" };
-        Label nameLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "_Name:"
-        };
+        Label nameLabel = new () { Text = "_Name:" };
         TextField nameField = new ()
         {
             X = Pos.Right (nameLabel) + 1,
             Y = 0,
             Width = Dim.Fill ()
         };
-        nameField.Accepting += (_, args) => args.Handled = true;
         nameStep.Add (nameLabel, nameField);
         wizard.AddStep (nameStep);
 
-        // Step 2: Favorite Fruits (multi-select using marks)
+        // --- Step 2: Favorite Fruits (multi-select) ---
         WizardStep fruitsStep = new () { Title = "Fruits" };
-        Label fruitsLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "_Favorite fruits (Space to toggle):"
-        };
-        var fruitChecked = new bool[FruitDisplayLabels.Length];
+        Label fruitsLabel = new () { Text = "_Favorite fruits (Space to toggle):" };
+        var fruitChecked = new bool[Fruits.Length];
         ListView fruitsList = new ()
         {
             X = 0,
@@ -183,18 +130,14 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Width = Dim.Fill (),
             Height = Dim.Fill ()
         };
-        fruitsList.SetSource (new ObservableCollection<string> (
-            FruitDisplayLabels.Select ((label, i) =>
-                FruitIsSelectable[i] ? $"[ ] {label}" : $"    {label}")));
+        RefreshFruitDisplay (fruitsList, fruitChecked);
 
         fruitsList.Accepting += (_, args) =>
         {
-            var idx = fruitsList.Value;
-
-            if (idx is >= 0 && idx < FruitIsSelectable.Length && FruitIsSelectable[idx.Value])
+            if (fruitsList.Value is { } idx && idx >= 0 && idx < Fruits.Length && Fruits[idx].Selectable)
             {
-                fruitChecked[idx.Value] = !fruitChecked[idx.Value];
-                UpdateFruitDisplay (fruitsList, fruitChecked);
+                fruitChecked[idx] = !fruitChecked[idx];
+                RefreshFruitDisplay (fruitsList, fruitChecked);
             }
 
             args.Handled = true;
@@ -203,14 +146,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         fruitsStep.Add (fruitsLabel, fruitsList);
         wizard.AddStep (fruitsStep);
 
-        // Step 3: Conditional - "Ok, but if you could only choose one"
+        // --- Step 3: Conditional single-pick (only if >1 fruit selected) ---
         WizardStep favFruitStep = new () { Title = "Favorite Fruit" };
-        Label favFruitLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "Ok, but if you could only choose _one:"
-        };
+        Label favFruitLabel = new () { Text = "Ok, but if you could only choose _one:" };
         ListView favFruitList = new ()
         {
             X = 0,
@@ -221,14 +159,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         favFruitStep.Add (favFruitLabel, favFruitList);
         wizard.AddStep (favFruitStep);
 
-        // Step 4: Favorite Sport
+        // --- Step 4: Favorite Sport ---
         WizardStep sportStep = new () { Title = "Sport" };
-        Label sportLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "Favorite _sport:"
-        };
+        Label sportLabel = new () { Text = "Favorite _sport:" };
         OptionSelector sportSelector = new ()
         {
             X = 0,
@@ -249,7 +182,6 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Y = Pos.Bottom (sportSelector) + 1,
             Width = Dim.Fill ()
         };
-        sportTextField.Accepting += (_, args) => args.Handled = true;
 
         sportSelector.ValueChanged += (_, args) =>
         {
@@ -262,19 +194,10 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         sportTextField.TextChanged += (_, _) =>
         {
             var text = (sportTextField.Text ?? string.Empty).Trim ();
-            var matchesOption = false;
 
-            for (var i = 0; i < sportSelector.Labels!.Count; i++)
-            {
-                if (string.Equals (text, sportSelector.Labels[i], StringComparison.OrdinalIgnoreCase))
-                {
-                    matchesOption = true;
-
-                    break;
-                }
-            }
-
-            if (!matchesOption && sportSelector.Value is not null)
+            if (sportSelector.Value is not null &&
+                !string.Equals (text, sportSelector.Labels![sportSelector.Value.Value],
+                    StringComparison.OrdinalIgnoreCase))
             {
                 sportSelector.Value = null;
             }
@@ -283,32 +206,28 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         sportStep.Add (sportLabel, sportSelector, sportOrLabel, sportTextField);
         wizard.AddStep (sportStep);
 
-        // Step 5: Age
+        // --- Step 5: Age (validated) ---
         WizardStep ageStep = new () { Title = "Age" };
-        Label ageLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "_Age (1-120):"
-        };
+        Label ageLabel = new () { Text = "_Age (1-120):" };
         TextField ageField = new ()
         {
             X = Pos.Right (ageLabel) + 1,
             Y = 0,
             Width = Dim.Fill ()
         };
-        ageField.Accepting += (_, args) => args.Handled = true;
-        ageStep.Add (ageLabel, ageField);
-        wizard.AddStep (ageStep);
-
-        // Step 6: Password
-        WizardStep passwordStep = new () { Title = "Password" };
-        Label passwordLabel = new ()
+        Label ageError = new ()
         {
             X = 0,
-            Y = 0,
-            Text = "_Password:"
+            Y = 1,
+            Width = Dim.Fill (),
+            Visible = false
         };
+        ageStep.Add (ageLabel, ageField, ageError);
+        wizard.AddStep (ageStep);
+
+        // --- Step 6: Password ---
+        WizardStep passwordStep = new () { Title = "Password" };
+        Label passwordLabel = new () { Text = "_Password:" };
         TextField passwordField = new ()
         {
             X = Pos.Right (passwordLabel) + 1,
@@ -316,18 +235,12 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Width = Dim.Fill (),
             Secret = true
         };
-        passwordField.Accepting += (_, args) => args.Handled = true;
         passwordStep.Add (passwordLabel, passwordField);
         wizard.AddStep (passwordStep);
 
-        // Step 7: Favorite Color
+        // --- Step 7: Favorite Color ---
         WizardStep colorStep = new () { Title = "Color" };
-        Label colorLabel = new ()
-        {
-            X = 0,
-            Y = 0,
-            Text = "Favorite _color:"
-        };
+        Label colorLabel = new () { Text = "Favorite _color:" };
         ColorPicker colorPicker = new ()
         {
             X = 0,
@@ -341,55 +254,74 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         colorStep.Add (colorLabel, colorPicker);
         wizard.AddStep (colorStep);
 
-        // Optional Step 8: Confirmation (only if --confirm is set)
+        // --- Optional Step 8: Confirmation with Spectre card rendering ---
         WizardStep? confirmStep = null;
-        Label? confirmContentLabel = null;
+        SpectreView? confirmView = null;
 
         if (confirm)
         {
             confirmStep = new WizardStep { Title = "Confirm" };
-            Label confirmLabel = new ()
-            {
-                X = 0,
-                Y = 0,
-                Text = "Review your answers and press Finish to _confirm:"
-            };
-            confirmContentLabel = new Label
+            Label confirmLabel = new () { Text = "Review your answers and press Finish to _confirm:" };
+            confirmView = new SpectreView
             {
                 X = 0,
                 Y = 2,
                 Width = Dim.Fill (),
                 Height = Dim.Fill ()
             };
-            confirmStep.Add (confirmLabel, confirmContentLabel);
+            confirmStep.Add (confirmLabel, confirmView);
             wizard.AddStep (confirmStep);
         }
 
-        // Handle step navigation to conditionally skip favFruitStep and populate confirm
+        // --- Step navigation ---
         wizard.StepChanged += (_, _) =>
         {
             if (wizard.CurrentStep == favFruitStep)
             {
-                List<string> selectedFruits = GetSelectedFruits (fruitChecked);
+                List<string> selected = GetSelectedFruits (fruitChecked);
 
-                if (selectedFruits.Count <= 1)
+                if (selected.Count <= 1)
                 {
                     wizard.GoNext ();
                 }
                 else
                 {
-                    favFruitList.SetSource (new ObservableCollection<string> (selectedFruits));
+                    favFruitList.SetSource (new ObservableCollection<string> (selected));
                 }
             }
-            else if (confirm && wizard.CurrentStep == confirmStep && confirmContentLabel is not null)
+            else if (wizard.CurrentStep == confirmStep && confirmView is not null)
             {
-                // Build preview text for confirmation
                 SurveyAnswers preview = BuildAnswers (
                     nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
-                confirmContentLabel.Text = FormatPreview (preview);
+                confirmView.Renderable = SpectreProfile.Build (preview);
             }
         };
 
+        // Validate age before allowing advancement past the age step
+        wizard.MovingNext += (_, args) =>
+        {
+            if (wizard.CurrentStep != ageStep)
+            {
+                return;
+            }
+
+            var ageText = (ageField.Text ?? string.Empty).Trim ();
+
+            if (ageText.Length == 0 ||
+                !int.TryParse (ageText, NumberStyles.None, CultureInfo.InvariantCulture, out var age) ||
+                age < 1 || age > 120)
+            {
+                ageError.Text = "Please enter a valid age between 1 and 120.";
+                ageError.Visible = true;
+                args.Cancel = true;
+            }
+            else
+            {
+                ageError.Visible = false;
+            }
+        };
+
+        // Capture results when wizard finishes
         SurveyAnswers? result = null;
 
         wizard.Accepting += (_, _) =>
@@ -399,6 +331,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         };
 
         await app.RunAsync (wizard, cancellationToken);
+
         return result;
     }
 
@@ -413,6 +346,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
     {
         var name = (nameField.Text ?? string.Empty).Trim ();
         List<string> selectedFruits = GetSelectedFruits (fruitChecked);
+
         var favoriteFruit = selectedFruits.Count == 1
             ? selectedFruits[0]
             : favFruitList.Value is >= 0 && favFruitList.Value < (favFruitList.Source?.Count ?? 0)
@@ -437,46 +371,27 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         return new SurveyAnswers (name, selectedFruits, favoriteFruit, sport, age, password, color);
     }
 
-    private static string FormatPreview (SurveyAnswers answers)
-    {
-        StringBuilder sb = new ();
-        sb.AppendLine ($"Name:     {answers.Name}");
-        sb.AppendLine ($"Fruits:   {string.Join (", ", answers.Fruits)}");
-
-        if (answers.FavoriteFruit is not null)
-        {
-            sb.AppendLine ($"Favorite: {answers.FavoriteFruit}");
-        }
-
-        sb.AppendLine ($"Sport:    {answers.Sport}");
-        sb.AppendLine ($"Age:      {answers.Age}");
-        sb.AppendLine ($"Password: {new string ('*', answers.Password.Length)}");
-        sb.AppendLine ($"Color:    {answers.Color}");
-
-        return sb.ToString ();
-    }
-
     private static List<string> GetSelectedFruits (bool[] fruitChecked)
     {
         List<string> selected = [];
 
         for (var i = 0; i < fruitChecked.Length; i++)
         {
-            if (fruitChecked[i] && FruitIsSelectable[i])
+            if (fruitChecked[i] && Fruits[i].Selectable)
             {
-                selected.Add (FruitValues[i]);
+                selected.Add (Fruits[i].Value);
             }
         }
 
         return selected;
     }
 
-    private static void UpdateFruitDisplay (ListView list, bool[] fruitChecked)
+    private static void RefreshFruitDisplay (ListView list, bool[] fruitChecked)
     {
-        IEnumerable<string> items = FruitDisplayLabels.Select ((label, i) =>
-            FruitIsSelectable[i]
-                ? fruitChecked[i] ? $"[x] {label}" : $"[ ] {label}"
-                : $"    {label}");
+        IEnumerable<string> items = Fruits.Select ((f, i) =>
+            f.Selectable
+                ? fruitChecked[i] ? $"[x] {f.Label}" : $"[ ] {f.Label}"
+                : $"    {f.Label}");
         list.SetSource (new ObservableCollection<string> (items));
     }
 }
