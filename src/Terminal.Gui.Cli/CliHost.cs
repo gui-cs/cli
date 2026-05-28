@@ -184,7 +184,16 @@ public sealed class CliHost
     private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        using IApplication app = Application.Create ().Init ();
+        var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+
+        using IApplication app = Application.Create ();
+        app.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
+
+        if (!useInline)
+        {
+            app.Init ();
+        }
+
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
     }
 
