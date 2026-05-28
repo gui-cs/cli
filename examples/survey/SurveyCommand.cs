@@ -195,7 +195,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 
         sportTextField.TextChanged += (_, _) =>
         {
-            var text = (sportTextField.Text).Trim ();
+            var text = sportTextField.Text.Trim ();
 
             if (sportSelector.Value is not null &&
                 !string.Equals (text, sportSelector.Labels![sportSelector.Value.Value],
@@ -317,7 +317,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                 return;
             }
 
-            var ageText = (ageField.Text).Trim ();
+            var ageText = ageField.Text.Trim ();
 
             if (ageText.Length == 0 ||
                 !int.TryParse (ageText, NumberStyles.None, CultureInfo.InvariantCulture, out var age) ||
@@ -356,7 +356,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         TextField passwordField,
         ColorPicker colorPicker)
     {
-        var name = (nameField.Text).Trim ();
+        var name = nameField.Text.Trim ();
         List<string> selectedFruits = GetSelectedFruits (fruitChecked);
 
         var favoriteFruit = selectedFruits.Count == 1
@@ -367,14 +367,14 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                     ? selectedFruits[0]
                     : null;
 
-        var sport = (sportTextField.Text).Trim ();
+        var sport = sportTextField.Text.Trim ();
 
         if (sport.Length == 0)
         {
             sport = "Unspecified";
         }
 
-        var ageText = (ageField.Text).Trim ();
+        var ageText = ageField.Text.Trim ();
         int.TryParse (ageText, NumberStyles.None, CultureInfo.InvariantCulture, out var age);
 
         var password = passwordField.Text ?? string.Empty;

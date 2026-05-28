@@ -180,6 +180,23 @@ public sealed class CliHost
             result = CreateCancelledResult ();
         }
 
+        // Terminal.Gui may change Console.OutputEncoding during its session (e.g. to UTF-8 for
+        // rendering). After shutdown, the encoding might be restored to OEM or left as UTF-8.
+        // Either way, the stdout/stderr references captured before TG ran are now stale
+        // (Console.Out is replaced whenever OutputEncoding changes). Ensure UTF-8 and use
+        // the current Console.Out/Error so Unicode content (box-drawing, etc.) renders correctly.
+        // Only do this when writing to the real console (not custom writers passed by tests).
+        if (stdout is not StringWriter)
+        {
+            if (Console.OutputEncoding.CodePage != System.Text.Encoding.UTF8.CodePage)
+            {
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+            }
+
+            stdout = Console.Out;
+            stderr = Console.Error;
+        }
+
         if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
                 _options.ResultJsonResolver))
         {
