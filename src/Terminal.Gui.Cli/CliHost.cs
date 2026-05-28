@@ -205,11 +205,7 @@ public sealed class CliHost
 
         using IApplication app = Application.Create ();
         app.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
-
-        if (!useInline)
-        {
-            app.Init ();
-        }
+        app.Init ();
 
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
     }
