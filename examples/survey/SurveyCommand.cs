@@ -359,15 +359,24 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         }
 
         // --- Step navigation ---
+        // Track direction so we only auto-skip the favFruitStep when moving forward.
+        var movingForward = true;
+        wizard.MovingBack += (_, _) => movingForward = false;
+        wizard.MovingNext += (_, _) => movingForward = true;
+
         wizard.StepChanged += (_, _) =>
         {
             if (wizard.CurrentStep == favFruitStep)
             {
                 List<string> selected = GetSelectedFruits (fruitsTree);
 
-                if (selected.Count <= 1)
+                if (movingForward && selected.Count <= 1)
                 {
                     wizard.GoNext ();
+                }
+                else if (!movingForward && selected.Count <= 1)
+                {
+                    wizard.GoBack ();
                 }
                 else
                 {
