@@ -175,15 +175,13 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             HelpText = """
                        ## Favorite Sport
 
-                       Choose from the **predefined options** or type your own:
+                       Pick from the list or type your own.
 
-                       | Option | Description |
-                       |--------|-------------|
-                       | Soccer | The beautiful game |
-                       | Hockey | Fast-paced ice sport |
-                       | Basketball | Slam dunks! |
+                       - **Soccer** – The beautiful game
+                       - **Hockey** – Fast-paced ice sport
+                       - **Basketball** – Slam dunks!
 
-                       > If you type a custom sport, the selector will deselect.
+                       > If you type a custom sport, the selector deselects.
                        """
         };
         Label sportLabel = new () { Text = "Favorite _sport:" };
@@ -370,17 +368,17 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             {
                 List<string> selected = GetSelectedFruits (fruitsTree);
 
-                if (movingForward && selected.Count <= 1)
+                switch (movingForward)
                 {
-                    wizard.GoNext ();
-                }
-                else if (!movingForward && selected.Count <= 1)
-                {
-                    wizard.GoBack ();
-                }
-                else
-                {
-                    favFruitList.SetSource (new ObservableCollection<string> (selected));
+                    case true when selected.Count <= 1:
+                        wizard.GoNext ();
+                        break;
+                    case false when selected.Count <= 1:
+                        wizard.GoBack ();
+                        break;
+                    default:
+                        favFruitList.SetSource (new ObservableCollection<string> (selected));
+                        break;
                 }
             }
             else if (wizard.CurrentStep == confirmStep && confirmView is not null)
