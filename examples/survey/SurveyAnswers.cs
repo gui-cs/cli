@@ -10,11 +10,11 @@ public sealed record SurveyAnswers (
     string Password,
     string? Color)
 {
-    /// <summary>A one-line, human-readable summary used for plain-text (non-JSON) output.</summary>
+    /// <summary>Renders the profile as a Spectre.Console table (with ANSI color codes) for terminal output.</summary>
     public override string ToString ()
     {
-        var fruits = Fruits.Count > 0 ? string.Join (", ", Fruits) : "none";
-        var color = Color ?? "unspecified";
-        return $"{Name}, age {Age} — likes {fruits}; plays {Sport}; favorite color {color}.";
+        using StringWriter sw = new ();
+        SpectreProfile.RenderToAnsi (this, sw);
+        return sw.ToString ().TrimEnd ();
     }
 }

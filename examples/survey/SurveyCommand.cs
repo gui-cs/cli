@@ -91,9 +91,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             return new CommandResult<SurveyAnswers> (CommandStatus.Cancelled, null, null, null);
         }
 
-        // Render the Spectre card to stdout after the wizard completes (like the Prompt example)
-        SpectreProfile.RenderToAnsi (captured, Console.Out);
-        return new CommandResult<SurveyAnswers> (CommandStatus.NoResult, captured, null, null);
+        return new CommandResult<SurveyAnswers> (CommandStatus.Ok, captured, null, null);
     }
 
     private static async Task<SurveyAnswers?> RunWizardAsync (
@@ -338,7 +336,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         // Capture results when wizard finishes
         SurveyAnswers? result = null;
 
-        wizard.Accepting += (_, _) =>
+        wizard.Accepted += (_, _) =>
         {
             result = BuildAnswers (
                 nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
