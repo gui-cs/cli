@@ -14,7 +14,7 @@ public sealed record SurveyAnswers (
     public override string ToString ()
     {
         var fruits = Fruits.Count > 0 ? string.Join (", ", Fruits) : "none";
-        var color = Color is null ? "unspecified" : Color;
+        var color = Color ?? "unspecified";
         return $"{Name}, age {Age} — likes {fruits}; plays {Sport}; favorite color {color}.";
     }
 }

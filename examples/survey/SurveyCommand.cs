@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Terminal.Gui.App;
+using Terminal.Gui.Configuration;
 using Terminal.Gui.Drawing;
 using Terminal.Gui.Interop.Spectre;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
+using Attribute = Terminal.Gui.Drawing.Attribute;
+using Color = Spectre.Console.Color;
 
 namespace Terminal.Gui.Cli.Survey;
 
@@ -104,7 +107,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Width = Dim.Fill (),
             Height = Fruits.Length + 6, // tall enough for the largest step (fruits list + label + buttons)
             BorderStyle = LineStyle.Rounded,
-            SchemeName = Configuration.SchemeManager.SchemesToSchemeName (Schemes.Accent)
+            SchemeName = SchemeManager.SchemesToSchemeName (Schemes.Accent)
         };
         wizard.Border.Thickness = new Thickness (0, 1, 0, 0);
 
@@ -135,7 +138,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 
         fruitsList.Accepting += (_, args) =>
         {
-            if (fruitsList.Value is { } idx && idx >= 0 && idx < Fruits.Length && Fruits[idx].Selectable)
+            if (fruitsList.Value is { } idx and >= 0 && idx < Fruits.Length && Fruits[idx].Selectable)
             {
                 fruitChecked[idx] = !fruitChecked[idx];
                 RefreshFruitDisplay (fruitsList, fruitChecked);
@@ -194,7 +197,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 
         sportTextField.TextChanged += (_, _) =>
         {
-            var text = (sportTextField.Text ?? string.Empty).Trim ();
+            var text = (sportTextField.Text).Trim ();
 
             if (sportSelector.Value is not null &&
                 !string.Equals (text, sportSelector.Labels![sportSelector.Value.Value],
@@ -296,12 +299,12 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                     nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
 
                 // Get the background color from the wizard step so the table blends in
-                var attr = confirmStep!.GetAttributeForRole (Drawing.VisualRole.Normal);
-                Spectre.Console.Color? spectreBg = null;
+                Attribute attr = confirmStep!.GetAttributeForRole (VisualRole.Normal);
+                Color? spectreBg = null;
 
                 if (attr is { Background: var tgBg } && tgBg != Drawing.Color.None)
                 {
-                    spectreBg = new Spectre.Console.Color (tgBg.R, tgBg.G, tgBg.B);
+                    spectreBg = new Color (tgBg.R, tgBg.G, tgBg.B);
                 }
 
                 confirmView.Renderable = SpectreProfile.Build (preview, spectreBg);
@@ -316,7 +319,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                 return;
             }
 
-            var ageText = (ageField.Text ?? string.Empty).Trim ();
+            var ageText = (ageField.Text).Trim ();
 
             if (ageText.Length == 0 ||
                 !int.TryParse (ageText, NumberStyles.None, CultureInfo.InvariantCulture, out var age) ||
@@ -355,7 +358,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         TextField passwordField,
         ColorPicker colorPicker)
     {
-        var name = (nameField.Text ?? string.Empty).Trim ();
+        var name = (nameField.Text).Trim ();
         List<string> selectedFruits = GetSelectedFruits (fruitChecked);
 
         var favoriteFruit = selectedFruits.Count == 1
@@ -366,14 +369,14 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                     ? selectedFruits[0]
                     : null;
 
-        var sport = (sportTextField.Text ?? string.Empty).Trim ();
+        var sport = (sportTextField.Text).Trim ();
 
         if (sport.Length == 0)
         {
             sport = "Unspecified";
         }
 
-        var ageText = (ageField.Text ?? string.Empty).Trim ();
+        var ageText = (ageField.Text).Trim ();
         int.TryParse (ageText, NumberStyles.None, CultureInfo.InvariantCulture, out var age);
 
         var password = passwordField.Text ?? string.Empty;
