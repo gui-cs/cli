@@ -110,7 +110,19 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.Border.Thickness = new Thickness (0, 1, 0, 0);
 
         // --- Step 1: Name ---
-        WizardStep nameStep = new () { Title = "Name" };
+        WizardStep nameStep = new ()
+        {
+            Title = "Name",
+            HelpText = """
+                       ## Your Name
+
+                       Enter your **full name** or a nickname.
+
+                       This will be displayed on your profile card.
+
+                       > *Tip:* Press `Tab` to move to the Next button.
+                       """
+        };
         Label nameLabel = new () { Text = "_Name:" };
         TextField nameField = new ()
         {
@@ -122,7 +134,26 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (nameStep);
 
         // --- Step 2: Favorite Fruits (multi-select) ---
-        WizardStep fruitsStep = new () { Title = "Fruits" };
+        WizardStep fruitsStep = new ()
+        {
+            Title = "Fruits",
+            HelpText = """
+                       ## Favorite Fruits
+
+                       Select your favorites from the list:
+
+                       - Press `Space` to toggle a selection
+                       - Use `↑`/`↓` to navigate
+
+                       ### Categories
+
+                       Some items are grouped under **Berries**:
+
+                       1. Strawberry
+                       2. Blueberry
+                       3. Raspberry
+                       """
+        };
         Label fruitsLabel = new () { Text = "_Favorite fruits (Space to toggle):" };
         var fruitChecked = new bool[Fruits.Length];
         ListView fruitsList = new ()
@@ -149,7 +180,17 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (fruitsStep);
 
         // --- Step 3: Conditional single-pick (only if >1 fruit selected) ---
-        WizardStep favFruitStep = new () { Title = "Favorite Fruit" };
+        WizardStep favFruitStep = new ()
+        {
+            Title = "Favorite Fruit",
+            HelpText = """
+                       ## Pick One
+
+                       You selected *multiple* fruits — now choose your **absolute favorite**.
+
+                       This step only appears when more than one fruit is selected.
+                       """
+        };
         Label favFruitLabel = new () { Text = "Ok, but if you could only choose _one:" };
         ListView favFruitList = new ()
         {
@@ -162,7 +203,23 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (favFruitStep);
 
         // --- Step 4: Favorite Sport ---
-        WizardStep sportStep = new () { Title = "Sport" };
+        WizardStep sportStep = new ()
+        {
+            Title = "Sport",
+            HelpText = """
+                       ## Favorite Sport
+
+                       Choose from the **predefined options** or type your own:
+
+                       | Option | Description |
+                       |--------|-------------|
+                       | Soccer | The beautiful game |
+                       | Hockey | Fast-paced ice sport |
+                       | Basketball | Slam dunks! |
+
+                       > If you type a custom sport, the selector will deselect.
+                       """
+        };
         Label sportLabel = new () { Text = "Favorite _sport:" };
         OptionSelector sportSelector = new ()
         {
@@ -209,7 +266,23 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (sportStep);
 
         // --- Step 5: Age (validated) ---
-        WizardStep ageStep = new () { Title = "Age" };
+        WizardStep ageStep = new ()
+        {
+            Title = "Age",
+            HelpText = """
+                       ## Your Age
+
+                       Enter a number between **1** and **120**.
+
+                       ### Validation Rules
+
+                       - Must be a whole number
+                       - No letters or symbols
+                       - Range: `1–120`
+
+                       An error message will appear if the value is invalid.
+                       """
+        };
         Label ageLabel = new () { Text = "_Age (1-120):" };
         TextField ageField = new ()
         {
@@ -228,7 +301,21 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (ageStep);
 
         // --- Step 6: Password ---
-        WizardStep passwordStep = new () { Title = "Password" };
+        WizardStep passwordStep = new ()
+        {
+            Title = "Password",
+            HelpText = """
+                       ## Password
+
+                       Enter a secret password. Characters are masked with `*`.
+
+                       ### Guidelines
+
+                       - **Minimum length:** none (for this demo)
+                       - Input is *not* echoed to the terminal
+                       - Stored only for display in the results card
+                       """
+        };
         Label passwordLabel = new () { Text = "_Password:" };
         TextField passwordField = new ()
         {
@@ -241,7 +328,23 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.AddStep (passwordStep);
 
         // --- Step 7: Favorite Color ---
-        WizardStep colorStep = new () { Title = "Color" };
+        WizardStep colorStep = new ()
+        {
+            Title = "Color",
+            HelpText = """
+                       ## Favorite Color
+
+                       Use the **ColorPicker** to choose a color:
+
+                       - Adjust `H`, `S`, `V` sliders
+                       - Or type a hex value directly (e.g. `#FF6600`)
+                       - The color name is shown below
+
+                       ### Color Spaces
+
+                       The picker supports [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) color space.
+                       """
+        };
         Label colorLabel = new () { Text = "Favorite _color:" };
         ColorPicker colorPicker = new ()
         {
@@ -262,7 +365,21 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 
         if (confirm)
         {
-            confirmStep = new WizardStep { Title = "Confirm" };
+            confirmStep = new WizardStep
+            {
+                Title = "Confirm",
+                HelpText = """
+                           ## Review & Confirm
+
+                           Check your answers in the table on the left.
+
+                           - Press **Finish** to accept
+                           - Press **Back** to make changes
+                           - Press `Esc` to cancel entirely
+
+                           > Your results will be printed to the terminal after confirmation.
+                           """
+            };
             Label confirmLabel = new () { Text = "Review your answers and press Finish to _confirm:" };
             confirmView = new SpectreView
             {
