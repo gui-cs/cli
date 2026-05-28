@@ -202,9 +202,9 @@ public sealed class CliHost
         CancellationToken cancellationToken)
     {
         var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+        Application.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
 
         using IApplication app = Application.Create ();
-        app.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
         app.Init ();
 
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
