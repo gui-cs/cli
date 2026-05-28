@@ -105,7 +105,8 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             Width = Dim.Fill (),
             Height = Fruits.Length + 6, // tall enough for the largest step (fruits list + label + buttons)
             BorderStyle = LineStyle.Rounded,
-            SchemeName = SchemeManager.SchemesToSchemeName (Schemes.Accent)
+            SchemeName = SchemeManager.SchemesToSchemeName (Schemes.Accent),
+            ShadowStyle = null
         };
         wizard.Border.Thickness = new Thickness (0, 1, 0, 0);
 
