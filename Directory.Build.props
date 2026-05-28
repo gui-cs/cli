@@ -18,17 +18,13 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
-    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.1-develop.11</TerminalGuiVersion>
+    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.3-develop.57</TerminalGuiVersion>
 
     <!-- SourceLink & symbol packages -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
-    <!-- Temporarily use local Terminal.Gui build for TreeView checkbox mode testing -->
-    <UseLocalTerminalGui>true</UseLocalTerminalGui>
-    <LocalTerminalGuiPath>D:\s\copilot-worktrees\Terminal.Gui\copilot-add-built-in-checkbox-mode-for-treeview\Terminal.Gui\Terminal.Gui.csproj</LocalTerminalGuiPath>
   </PropertyGroup>
 
   <ItemGroup>
