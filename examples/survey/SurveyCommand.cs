@@ -18,22 +18,6 @@ namespace Terminal.Gui.Cli.Survey;
 /// </summary>
 public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 {
-    /// <summary>Fruit catalog: (display label, value for output, whether the row is selectable).</summary>
-    private static readonly (string Label, string Value, bool Selectable)[] Fruits =
-    [
-        ("Apple", "Apple", true),
-        ("Apricot", "Apricot", true),
-        ("Banana", "Banana", true),
-        ("Berries:", "", false),
-        ("    Blackberry", "Blackberry", true),
-        ("    Blueberry", "Blueberry", true),
-        ("    Raspberry", "Raspberry", true),
-        ("    Strawberry", "Strawberry", true),
-        ("Mango", "Mango", true),
-        ("Orange", "Orange", true),
-        ("Pear", "Pear", true)
-    ];
-
     /// <inheritdoc />
     public string PrimaryAlias => "survey";
 
@@ -103,7 +87,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             Title = "Survey - Enter to accept, Esc to quit",
             Width = Dim.Fill (),
-            Height = Fruits.Length + 6, // tall enough for the largest step (fruits list + label + buttons)
+            Height = 17, // tall enough for the largest step (fruits tree fully expanded + label + buttons)
             BorderStyle = LineStyle.Rounded,
             SchemeName = SchemeManager.SchemesToSchemeName (Schemes.Accent),
             ShadowStyle = null
@@ -156,28 +140,9 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
                        """
         };
         Label fruitsLabel = new () { Text = "_Favorite fruits (Space to toggle):" };
-        var fruitChecked = new bool[Fruits.Length];
-        ListView fruitsList = new ()
-        {
-            X = 0,
-            Y = 1,
-            Width = Dim.Auto (),
-            Height = Dim.Fill ()
-        };
-        RefreshFruitDisplay (fruitsList, fruitChecked);
+        TreeView fruitsTree = CreateFruitsTreeView ();
 
-        fruitsList.Accepting += (_, args) =>
-        {
-            if (fruitsList.Value is { } idx and >= 0 && idx < Fruits.Length && Fruits[idx].Selectable)
-            {
-                fruitChecked[idx] = !fruitChecked[idx];
-                RefreshFruitDisplay (fruitsList, fruitChecked);
-            }
-
-            args.Handled = true;
-        };
-
-        fruitsStep.Add (fruitsLabel, fruitsList);
+        fruitsStep.Add (fruitsLabel, fruitsTree);
         wizard.AddStep (fruitsStep);
 
         // --- Step 3: Conditional single-pick (only if >1 fruit selected) ---
@@ -398,7 +363,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         {
             if (wizard.CurrentStep == favFruitStep)
             {
-                List<string> selected = GetSelectedFruits (fruitChecked);
+                List<string> selected = GetSelectedFruits (fruitsTree);
 
                 if (selected.Count <= 1)
                 {
@@ -412,7 +377,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
             else if (wizard.CurrentStep == confirmStep && confirmView is not null)
             {
                 SurveyAnswers preview = BuildAnswers (
-                    nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
+                    nameField, fruitsTree, favFruitList, sportTextField, ageField, passwordField, colorPicker);
 
                 // Get the background color from the wizard step so the table blends in
                 Attribute attr = confirmStep!.GetAttributeForRole (VisualRole.Normal);
@@ -457,7 +422,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         wizard.Accepted += (_, _) =>
         {
             result = BuildAnswers (
-                nameField, fruitChecked, favFruitList, sportTextField, ageField, passwordField, colorPicker);
+                nameField, fruitsTree, favFruitList, sportTextField, ageField, passwordField, colorPicker);
         };
 
         await app.RunAsync (wizard, cancellationToken);
@@ -467,7 +432,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
 
     private static SurveyAnswers BuildAnswers (
         TextField nameField,
-        bool[] fruitChecked,
+        TreeView fruitsTree,
         ListView favFruitList,
         TextField sportTextField,
         TextField ageField,
@@ -475,7 +440,7 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         ColorPicker colorPicker)
     {
         var name = nameField.Text.Trim ();
-        List<string> selectedFruits = GetSelectedFruits (fruitChecked);
+        List<string> selectedFruits = GetSelectedFruits (fruitsTree);
 
         var favoriteFruit = selectedFruits.Count == 1
             ? selectedFruits[0]
@@ -501,27 +466,49 @@ public sealed class SurveyCommand : ICliCommand<SurveyAnswers>
         return new SurveyAnswers (name, selectedFruits, favoriteFruit, sport, age, password, color);
     }
 
-    private static List<string> GetSelectedFruits (bool[] fruitChecked)
+    /// <summary>Builds the hierarchical fruit tree with "Berries" as a parent category.</summary>
+    private static TreeView CreateFruitsTreeView ()
     {
-        List<string> selected = [];
-
-        for (var i = 0; i < fruitChecked.Length; i++)
+        TreeView tree = new ()
         {
-            if (fruitChecked[i] && Fruits[i].Selectable)
-            {
-                selected.Add (Fruits[i].Value);
-            }
-        }
+            X = 0,
+            Y = 1,
+            Width = Dim.Auto (),
+            Height = Dim.Fill (),
+            CheckboxMode = true
+        };
 
-        return selected;
+        tree.AddObject (new TreeNode { Text = "Apple" });
+        tree.AddObject (new TreeNode { Text = "Apricot" });
+        tree.AddObject (new TreeNode { Text = "Banana" });
+
+        tree.AddObject (new TreeNode
+        {
+            Text = "Berries",
+            Children =
+            [
+                new TreeNode { Text = "Blackberry" },
+                new TreeNode { Text = "Blueberry" },
+                new TreeNode { Text = "Raspberry" },
+                new TreeNode { Text = "Strawberry" }
+            ]
+        });
+
+        tree.AddObject (new TreeNode { Text = "Mango" });
+        tree.AddObject (new TreeNode { Text = "Orange" });
+        tree.AddObject (new TreeNode { Text = "Pear" });
+
+        tree.ExpandAll ();
+
+        return tree;
     }
 
-    private static void RefreshFruitDisplay (ListView list, bool[] fruitChecked)
+    /// <summary>Gets the list of checked leaf-node fruit names from the tree.</summary>
+    private static List<string> GetSelectedFruits (TreeView fruitsTree)
     {
-        IEnumerable<string> items = Fruits.Select ((f, i) =>
-            f.Selectable
-                ? fruitChecked[i] ? $"[x] {f.Label}" : $"[ ] {f.Label}"
-                : $"    {f.Label}");
-        list.SetSource (new ObservableCollection<string> (items));
+        return fruitsTree.GetCheckedObjects ()
+            .Where (node => node.Children.Count == 0) // leaf nodes only (skip "Berries" category)
+            .Select (node => node.Text)
+            .ToList ();
     }
 }

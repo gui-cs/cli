@@ -26,9 +26,9 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <!-- Temporarily use local Terminal.Gui build for wizard fix testing -->
+    <!-- Temporarily use local Terminal.Gui build for TreeView checkbox mode testing -->
     <UseLocalTerminalGui>true</UseLocalTerminalGui>
-    <LocalTerminalGuiPath>D:\s\copilot-worktrees\Terminal.Gui\copilot-fix-wizard-next-finish-button\Terminal.Gui\Terminal.Gui.csproj</LocalTerminalGuiPath>
+    <LocalTerminalGuiPath>D:\s\copilot-worktrees\Terminal.Gui\copilot-add-built-in-checkbox-mode-for-treeview\Terminal.Gui\Terminal.Gui.csproj</LocalTerminalGuiPath>
   </PropertyGroup>
 
   <ItemGroup>

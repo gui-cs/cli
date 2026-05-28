@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using Terminal.Gui.App;
 
 namespace Terminal.Gui.Cli;
@@ -188,9 +189,9 @@ public sealed class CliHost
         // Only do this when writing to the real console (not custom writers passed by tests).
         if (stdout is not StringWriter)
         {
-            if (Console.OutputEncoding.CodePage != System.Text.Encoding.UTF8.CodePage)
+            if (Console.OutputEncoding.CodePage != Encoding.UTF8.CodePage)
             {
-                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                Console.OutputEncoding = Encoding.UTF8;
             }
 
             stdout = Console.Out;
